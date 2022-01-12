@@ -20,6 +20,6 @@
     "@types/node": "^17.0.8"
   },
   "dependencies": {
-    "midi-parser-js": "^4.0.4"
+    "midi-converter": "^0.1.5"
   }
 }

@@ -1,15 +1,15 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-let midiParser  = require('midi-parser-js');
+var midiConverter = require('midi-converter');
 
-function main() {
+async function main() {
     const [file] = process.argv.slice(2);
 
-    const input = readFileSync(path.join(__dirname, file), { encoding: "base64" });
-    
-    const { track } = midiParser.parse(input);
-    track[1].event.forEach((e: any) => console.log(e));
+    const buffer = readFileSync(path.join(__dirname, file), {encoding: 'binary'});
+    const { tracks } = midiConverter.midiToJson(buffer);
+
+    console.log(tracks[1].slice(0, 10));
 }
 
 main();
