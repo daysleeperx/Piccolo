@@ -35,19 +35,23 @@ function transitionMatrix(notes: Note[]): Map<string, Map<string, number>> {
     );
 }
 
-function *generate(start: Note, transtions: Map<string, Map<string, number>>, steps: number): Generator<Note> {
-    let current: Note = start;
+function* generate(current: Note, transtions: Map<string, Map<string, number>>, step: number): Generator<Note> {
+    let next: Note;
 
-    for (const _ of Array(steps).keys()) {
-        const [pitch, duration] = current;
-        if (transtions.has(`${pitch}:${duration}`)) {
-            const probs = transtions.get(`${pitch}:${duration}`);
-            current = [...probs.keys()][Math.floor(Math.random() * probs.size)].split(":").map(Number) as Note;
-        } else {
-            current = [...transtions.keys()][Math.floor(Math.random() * transtions.size)].split(":").map(Number) as Note;
-        }
-        yield current;
+    if (step === 0) {
+        return;
     }
+
+    const [pitch, duration] = current;
+    if (transtions.has(`${pitch}:${duration}`)) {
+        const probs = transtions.get(`${pitch}:${duration}`);
+        next = [...probs.keys()][Math.floor(Math.random() * probs.size)].split(":").map(Number) as Note;
+    } else {
+        next = [...transtions.keys()][Math.floor(Math.random() * transtions.size)].split(":").map(Number) as Note;
+    }
+
+    yield next;
+    yield* generate(next, transtions, step - 1);  
 }
 
 function notesToMidi(notes: Note[]): MIDIMessage[] {
