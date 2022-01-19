@@ -14,17 +14,19 @@ interface MIDIMessage {
 
 type Note = [pitch: number, duration: number];
 
-const toNote = ({noteNumber} : MIDIMessage, {deltaTime} : MIDIMessage) : Note => [noteNumber, deltaTime];
+const msgToNote = ({noteNumber} : MIDIMessage, {deltaTime} : MIDIMessage) : Note => [noteNumber, deltaTime];
+const keyToNote = (seqKey: string) : Note => seqKey.split(":").map(Number) as Note;
 
-function transitionMatrix(notes: Note[]): Map<string, Map<string, number>> {
+function transitionMatrix(notes: Note[], order: number): Map<string, Map<string, number>> {
     return notes
-        .slice(1)
-        .map((note: Note, idx: number) => [note, notes[idx]])
+        .slice(order)
+        .map((note: Note, idx: number) => [note, notes.slice(idx, idx + order)])
         .reduce((acc, [curr, prev]) => {
-            const [[nextPitch, nextDuration], [pitch, duration]] = [curr, prev];
-            const probs: Map<string, number> = acc.get(`${pitch}:${duration}`) ?? new Map();
+            const [nextPitch, nextDuration] = curr;
+            const seqKey: string = (prev as Note[]).map<string>(([pitch, duration]) => `${pitch}:${duration}`).join("->"); 
+            const probs: Map<string, number> = acc.get(seqKey) ?? new Map();
             return acc.set(
-                `${pitch}:${duration}`, 
+                seqKey, 
                 probs.set(
                     `${nextPitch}:${nextDuration}`, 
                     (probs.get(`${nextPitch}:${nextDuration}`) ?? 0) + 1
@@ -35,24 +37,29 @@ function transitionMatrix(notes: Note[]): Map<string, Map<string, number>> {
     );
 }
 
-function* generate(current: Note, transtions: Map<string, Map<string, number>>, step: number): Generator<Note> {
-    let next: Note;
+function getRandomSeqKey(matrix: Map<string, any>): string {
+    return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
+}
+
+function* generate(current: Note[], transtions: Map<string, Map<string, number>>, step: number): Generator<Note> {
+    let next: Note[];
 
     if (step === 0) {
         return;
     }
 
-    const [pitch, duration] = current;
-    if (transtions.has(`${pitch}:${duration}`)) {
-        const probs = transtions.get(`${pitch}:${duration}`);
-        next = [...probs.keys()][Math.floor(Math.random() * probs.size)].split(":").map(Number) as Note;
+    const seqKey: string = current.map<string>(([pitch, duration]) => `${pitch}:${duration}`).join("->");
+    if (transtions.has(seqKey)) {
+        const nextNote = keyToNote(getRandomSeqKey(transtions.get(seqKey)));
+        next = [...current.slice(1), nextNote];
     } else {
-        next = [...transtions.keys()][Math.floor(Math.random() * transtions.size)].split(":").map(Number) as Note;
+        next = getRandomSeqKey(transtions).split("->").map(keyToNote);
     }
 
-    yield next;
-    yield* generate(next, transtions, step - 1);  
+    yield next[next.length - 1];
+    yield* generate(next, transtions, step - 1);
 }
+
 
 function notesToMidi(notes: Note[]): MIDIMessage[] {
     return notes.flatMap(([pitch, duration]) => [{
@@ -76,7 +83,7 @@ function notesToMidi(notes: Note[]): MIDIMessage[] {
 async function main() {
     console.time("Generate MIDI");
 
-    const [file, output] = process.argv.slice(2);
+    const [file, output, order] = process.argv.slice(2);
 
     const buffer = readFileSync(path.join(__dirname, file), {encoding: 'binary'});
     const { header, tracks } = midiConverter.midiToJson(buffer);
@@ -85,14 +92,14 @@ async function main() {
 
     const notes: Note[] = tracks[1]
             .filter(({subtype} : MIDIMessage) => subtype?.startsWith("note"))
-            .map((m: MIDIMessage, idx: number, xs: MIDIMessage[]) => idx % 2 === 0 && toNote(m, xs[idx + 1]))
+            .map((m: MIDIMessage, idx: number, xs: MIDIMessage[]) => idx % 2 === 0 && msgToNote(m, xs[idx + 1]))
             .filter((x: Note) => x);
             
-    const transitions: Map<string, Map<string, number>> = transitionMatrix(notes);        
+    const transitions: Map<string, Map<string, number>> = transitionMatrix(notes, +order);
     console.log(transitions);
     
-    const start: Note = [...transitions.keys()][Math.floor(Math.random() * transitions.size)].split(":").map(Number) as Note;
-    const generatedNotes = [...generate(start, transitions, 100)];
+    const seed: Note[] = getRandomSeqKey(transitions).split("->").map(keyToNote);
+    const generatedNotes = [...generate(seed, transitions, 100)];
     console.log(generatedNotes);
 
     const outPutMidi = midiConverter.jsonToMidi({tracks: [notesToMidi(generatedNotes)]});        
