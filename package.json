@@ -20,6 +20,7 @@
     "@types/node": "^17.0.8"
   },
   "dependencies": {
-    "midi-converter": "^0.1.5"
+    "midi-converter": "^0.1.5",
+    "osc-js": "^2.2.0"
   }
 }

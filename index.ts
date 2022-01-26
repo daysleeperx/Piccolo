@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 var midiConverter = require('midi-converter');
+const dgram = require('dgram');
+const OSC = require('osc-js');
 
 interface MIDIMessage {
     deltaTime: number,
@@ -80,6 +82,10 @@ function notesToMidi(notes: Note[]): MIDIMessage[] {
     ]);
 }
 
+async function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function main() {
     console.time("Generate MIDI");
 
@@ -102,10 +108,26 @@ async function main() {
     const generatedNotes = [...generate(seed, transitions, 100)];
     console.log(generatedNotes);
 
+    console.timeEnd("Generate MIDI");
+
+    console.time("Send OSC to Sonic Pi");
+    const socket = dgram.createSocket('udp4');
+
+    const { ticksPerBeat } = header;
+
+    for (const [pitch, duration] of generatedNotes) {
+        const message = new OSC.Message('/melody/notes', pitch);
+        const binary = message.pack();
+        console.log("Sending OSC: ", message);
+        
+        socket.send(Buffer.from(binary), 0, binary.byteLength, 4560, 'localhost');
+        await sleep(duration / ticksPerBeat * 1000);
+    }
+    console.timeEnd("Send OSC to Sonic Pi");
+    socket.close();
+
     const outPutMidi = midiConverter.jsonToMidi({tracks: [notesToMidi(generatedNotes)]});        
     writeFileSync(output, outPutMidi, 'binary');
-
-    console.timeEnd("Generate MIDI");
 }
 
 main();
