@@ -2,6 +2,7 @@ module Types
 import Data.Fin
 import Data.Vect
 import Data.Buffer
+import System.File
 
 
 {-- MIDI representation as per Standard MIDI Files 1.0 Specification --}
@@ -69,3 +70,8 @@ namespace Midi
     tracks      : Vect ntrks Track
     division    : TimeDivision
 
+main : IO ()
+main = do
+        (Right buf) <- createBufferFromFile "invent2.midi" | (Left error) => printLn error
+        res <- bufferData buf
+        printLn res

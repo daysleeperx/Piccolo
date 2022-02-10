@@ -5,6 +5,7 @@ var midiConverter = require('midi-converter');
 const dgram = require('dgram');
 const OSC = require('osc-js');
 
+// test
 interface MIDIMessage {
     deltaTime: number,
     channel: number,
@@ -61,7 +62,6 @@ function* generate(current: Note[], transtions: Map<string, Map<string, number>>
     yield next[next.length - 1];
     yield* generate(next, transtions, step - 1);
 }
-
 
 function notesToMidi(notes: Note[]): MIDIMessage[] {
     return notes.flatMap(([pitch, duration]) => [{

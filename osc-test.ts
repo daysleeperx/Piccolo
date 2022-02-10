@@ -3,8 +3,7 @@ const OSC = require('osc-js');
 
 function* randomNotes(): Generator<number> {
     while (true) {
-        const note = Math.floor(Math.random() * 127);
-        yield note;
+        yield Math.floor(Math.random() * 127);
     }
 }
 

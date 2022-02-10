@@ -352,3 +352,12 @@ MigrationBackup/
 .DS_Store
 
 /out/
+
+# Idris
+**/build/*
+**/interpret_app/*
+*.ibc
+*.o
+*.ttc
+*.ttm
+interpret
