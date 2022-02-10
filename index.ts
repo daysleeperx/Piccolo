@@ -5,7 +5,7 @@ var midiConverter = require('midi-converter');
 const dgram = require('dgram');
 const OSC = require('osc-js');
 
-// test
+
 interface MIDIMessage {
     deltaTime: number,
     channel: number,
