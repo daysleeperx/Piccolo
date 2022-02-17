@@ -1,4 +1,4 @@
-namespace Midi {
+export namespace Midi {
     /**
      * MIDI representation as per Standard MIDI Files 1.0 Specification.
      */
@@ -175,6 +175,14 @@ namespace Midi {
          * MIDI Parser interface.
          * @param {Buffer} file MIDI input file
          */
-        parse(file: Buffer): void;
+        parse(file: Buffer): MidiFile;
+    }
+
+    export interface Builder {
+        /**
+         * MIDI Builder interface.
+         * @param {MidiFile} midi MidiFile object 
+         */
+        build(midi: MidiFile): Buffer;
     }
 }

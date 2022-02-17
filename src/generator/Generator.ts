@@ -1,9 +1,22 @@
-namespace MusicGenerator {
+export namespace MusicGenerator {
     /**
      * Internal music representation types and interfaces.
      */
-    export type Note = [pitch: number, duration: number];
-    export type Sequence = Note[];
+    export type Note = [pitch: number, quantizedSteps: number];
+
+    export interface Quantization {
+        stepsPerQuater: number;
+    }
+
+    export interface Tempo {
+        bpm: number;
+    }
+
+    export interface Sequence {
+        notes: Note[];
+        quantization: Quantization;
+        tempo: Tempo;
+    }
 
     export interface Generator {
         /**
