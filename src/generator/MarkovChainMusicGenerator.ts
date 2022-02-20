@@ -71,6 +71,6 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
         }
     
         yield next[next.length - 1];
-        yield* this.generateSequence(next, transtions, step - 1);
+        yield *this.generateSequence(next, transtions, step - 1);
     }
 }

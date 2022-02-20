@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "midi-converter": "^0.1.5",
+    "midi-parser-js": "^4.0.4",
     "osc-js": "^2.2.0"
   }
 }
