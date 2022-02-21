@@ -164,6 +164,7 @@ export namespace Midi {
 
     export interface MidiFile {
         format: FileFormat;
+        ntrks: number;
         tracks: Track[];
         division: TimeDivision;
     }
