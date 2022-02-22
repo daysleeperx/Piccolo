@@ -120,7 +120,7 @@ export class MidiParser implements Midi.Parser {
                 if(statusByte === 0xFF) {                                        // Meta Event type
                     const metaType = file.readInt(1);                           // assign metaEvent subtype
                     const metaEventLength = file.readIntVLV();                    // get the metaEvent length
-                    switch(metaType){
+                    switch(metaType) {
                         case 0x2F:                                              // end of track, has no data byte
                         case -1:                                                // EOF
                             midiFile.tracks[t - 1][e - 1] = [deltaTime, {}]
@@ -150,112 +150,131 @@ export class MidiParser implements Midi.Parser {
                             break;
                         case 0x20:                                              // Channel Prefix
                         case 0x21:                                              // MIDI PORT
-                        case 0x59:                                              // Key Signature
                         case 0x51:                                              // Set Tempo
+                        case 0x59:                                              // Key Signature
                             midiFile.tracks[t - 1][e - 1] = [
                                 deltaTime,
                                 {value: file.readInt(metaEventLength)}
                             ];
                             break;
                         case 0x54:                                              // SMPTE Offset
-                            MIDI.track[t-1].event[e-1].data    = [];
-                            MIDI.track[t-1].event[e-1].data[0] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[1] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[2] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[3] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[4] = file.readInt(1);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    hour: file.readInt(1),
+                                    minute: file.readInt(1),
+                                    second: file.readInt(1),
+                                    frame: file.readInt(1),
+                                    fractionalFrames: file.readInt(1)
+                                }
+                            ];
                             break;
                         case 0x58:                                              // Time Signature
-                            MIDI.track[t-1].event[e-1].data    = [];
-                            MIDI.track[t-1].event[e-1].data[0] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[1] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[2] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[3] = file.readInt(1);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    numerator: file.readInt(1),
+                                    denominator: file.readInt(1),
+                                    clocks: file.readInt(1),
+                                    bb: file.readInt(1)
+                                }
+                            ];
                             break;
                         default :
-                            // if user provided a custom interpreter, call it
-                            // and assign to event the returned data
-                            if( this.customInterpreter !== null){
-                                MIDI.track[t-1].event[e-1].data = this.customInterpreter( MIDI.track[t-1].event[e-1].metaType, file, metaEventLength);
-                            }
-                            // if no customInterpretr is provided, or returned
-                            // false (=apply default), perform default action
-                            if(this.customInterpreter === null || MIDI.track[t-1].event[e-1].data === false){
-                                file.readInt(metaEventLength);
-                                MIDI.track[t-1].event[e-1].data = file.readInt(metaEventLength);
-                                if (this.debug) console.info('Unimplemented 0xFF meta event! data block readed as Integer');
-                            }
+                            file.readInt(metaEventLength);
+                            midiFile.tracks[t - 1][e - 1] = [  
+                                deltaTime,
+                                {data: file.readInt(metaEventLength)} 
+                            ];
+                            console.info('Unimplemented 0xFF meta event! data block readed as Integer');
                     }
                 }
 
                 //
                 // IS REGULAR EVENT
                 //
-                else{                                                           // MIDI Control Events OR System Exclusive Events
+                else {                                                           // MIDI Control Events OR System Exclusive Events
                     statusByte = statusByte.toString(16).split('');             // split the status byte HEX representation, to obtain 4 bits values
                     if(!statusByte[1]) statusByte.unshift('0');                 // force 2 digits
-                    MIDI.track[t-1].event[e-1].type = parseInt(statusByte[0], 16);// first byte is EVENT TYPE ID
-                    MIDI.track[t-1].event[e-1].channel = parseInt(statusByte[1], 16);// second byte is channel
-                    switch(MIDI.track[t-1].event[e-1].type){
-                        case 0xF:{                                              // System Exclusive Events
-
-                            // if user provided a custom interpreter, call it
-                            // and assign to event the returned data
-                            if( this.customInterpreter !== null){
-                                MIDI.track[t-1].event[e-1].data = this.customInterpreter( MIDI.track[t-1].event[e-1].type, file , false);
-                            }
-
-                            // if no customInterpretr is provided, or returned
-                            // false (=apply default), perform default action
-                            if(this.customInterpreter === null || MIDI.track[t-1].event[e-1].data === false){
-                                let event_length = file.readIntVLV();
-                                MIDI.track[t-1].event[e-1].data = file.readInt(event_length);
-                                if (this.debug) console.info('Unimplemented 0xF exclusive events! data block readed as Integer');
-                            }
+                    const eventType = parseInt(statusByte[0], 16);              // first byte is EVENT TYPE ID
+                    const channel = parseInt(statusByte[1], 16);                // second byte is channel
+                    switch (eventType) {
+                        case 0xF: {                                              // System Exclusive Events
+                            const event_length = file.readIntVLV();
+                            midiFile.tracks[t - 1][e - 1] = [  
+                                deltaTime,
+                                {data: file.readInt(event_length)} 
+                            ];
+                            console.info('Unimplemented 0xF exclusive events! data block readed as Integer');
                             break;
                         }
-                        case 0xA:                                               // Note Aftertouch
-                        case 0xB:                                               // Controller
-                        case 0xE:                                               // Pitch Bend Event
                         case 0x8:                                               // Note off
                         case 0x9:                                               // Note On
-                            MIDI.track[t-1].event[e-1].data = [];
-                            MIDI.track[t-1].event[e-1].data[0] = file.readInt(1);
-                            MIDI.track[t-1].event[e-1].data[1] = file.readInt(1);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    note: file.readInt(1),
+                                    velocity: file.readInt(1)
+                                }
+                            ];
                             break;
-                        case 0xC:                                               // Program Change
+                        case 0xA:                                               // Note Aftertouch
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    note: file.readInt(1),
+                                    pressure: file.readInt(1)
+                                }
+                            ];
+                            break;
+                        case 0xB:                                               // Controller
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    controller: file.readInt(1),
+                                    value: file.readInt(1)
+                                }
+                            ];
+                            break;
+                        case 0xE:                                               // Pitch Bend Event
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    value: file.readInt(2)
+                                }
+                            ];
+                            break;
+                        case 0xC:                                              // Program Change
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    preset: file.readInt(1)
+                                }
+                            ];
+                            break;
                         case 0xD:                                               // Channel Aftertouch
-                            MIDI.track[t-1].event[e-1].data = file.readInt(1);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {
+                                    channel,
+                                    pressure: file.readInt(1)
+                                }
+                            ];
                             break;
                         case -1:                                                // EOF
                             endOfTrack = true;                                  // change FLAG to force track reading loop breaking
                             break;
                         default:
-                            // if user provided a custom interpreter, call it
-                            // and assign to event the returned data
-                            if( this.customInterpreter !== null){
-                                MIDI.track[t-1].event[e-1].data = this.customInterpreter( MIDI.track[t-1].event[e-1].metaType, file , false);
-                            }
-
-                            // if no customInterpretr is provided, or returned
-                            // false (=apply default), perform default action
-                            if(this.customInterpreter === null || MIDI.track[t-1].event[e-1].data === false){
-                                console.log('Unknown EVENT detected... reading cancelled!');
-                                return false;
-                            }
+                           throw new Error('Unknown EVENT detected... reading cancelled!');
                     }
                 }
             }
         }
-        return MIDI;
+        return midiFile;
     }
-
-    /**
-     * custom function to handle unimplemented, or custom midi messages.
-     * If message is a meta-event, the value of metaEventLength will be >0.
-     * Function must return the value to store, and pointer of dataView needs
-     * to be manually increased
-     * If you want default action to be performed, return false
-     */
-    customInterpreter : null // function( e_type , arrayByffer, metaEventLength){ return e_data_int }
 };
