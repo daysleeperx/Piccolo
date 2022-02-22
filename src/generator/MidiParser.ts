@@ -104,39 +104,58 @@ export class MidiParser implements Midi.Parser {
                 e++;                                                            // increase by 1 event counter
                 const deltaTime: number = file.readIntVLV();                    // get DELTA TIME OF MIDI event (Variable Length Value)
                 statusByte = file.readInt(1);                                   // read EVENT TYPE (STATUS BYTE)
-                if(statusByte === -1) break;                                    // EOF
-                else if(statusByte >= 128) laststatusByte = statusByte;         // NEW STATUS BYTE DETECTED
-                else{                                                           // 'RUNNING STATUS' situation detected
+                if (statusByte === -1) { 
+                    break; 
+                }                                    // EOF
+                else if (statusByte >= 128) { 
+                    laststatusByte = statusByte; 
+                } else {                                                           // 'RUNNING STATUS' situation detected
                     statusByte = laststatusByte;                                // apply last loop, Status Byte
                     file.movePointer(-1);                                       // move back the pointer (cause readed byte is not status byte)
                 }
 
-
                 //
                 // ** IS META EVENT
                 //
-                if(statusByte === 0xFF){                                        // Meta Event type
-                    MIDI.track[t-1].event[e-1].type = 0xFF;                     // assign metaEvent code to array
-                    MIDI.track[t-1].event[e-1].metaType =  file.readInt(1);     // assign metaEvent subtype
-                    let metaEventLength = file.readIntVLV();                    // get the metaEvent length
-                    switch(MIDI.track[t-1].event[e-1].metaType){
+                if(statusByte === 0xFF) {                                        // Meta Event type
+                    const metaType = file.readInt(1);                           // assign metaEvent subtype
+                    const metaEventLength = file.readIntVLV();                    // get the metaEvent length
+                    switch(metaType){
                         case 0x2F:                                              // end of track, has no data byte
                         case -1:                                                // EOF
+                            midiFile.tracks[t - 1][e - 1] = [deltaTime, {}]
                             endOfTrack = true;                                  // change FLAG to force track reading loop breaking
                             break;
                         case 0x01:                                              // Text Event
-                        case 0x02:                                              // Copyright Notice
-                        case 0x03:
-                        case 0x04:                                              // Instrument Name
-                        case 0x05:                                              // Lyrics)
-                        case 0x07:                                              // Cue point                                         // Sequence/Track Name (documentation: http://www.ta7.de/txt/musik/musi0006.htm)
-                        case 0x06:                                              // Marker
-                            MIDI.track[t-1].event[e-1].data = file.readStr(metaEventLength);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime, 
+                                {text: file.readStr(metaEventLength)}
+                            ];
                             break;
+                        case 0x02:                                              // Copyright Notice
+                        case 0x05:                                              // Lyrics)
+                        case 0x06:                                              // Marker
+                        case 0x07:                                              // Cue point                                         // Sequence/Track Name (documentation: http://www.ta7.de/txt/musik/musi0006.htm)
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {value: file.readStr(metaEventLength)}
+                            ];
+                            break;
+                        case 0x03:                                              // Track name
+                        case 0x04:                                              // Instrument Name
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {name: file.readStr(metaEventLength)}
+                            ]
+                            break;
+                        case 0x20:                                              // Channel Prefix
                         case 0x21:                                              // MIDI PORT
                         case 0x59:                                              // Key Signature
                         case 0x51:                                              // Set Tempo
-                            MIDI.track[t-1].event[e-1].data = file.readInt(metaEventLength);
+                            midiFile.tracks[t - 1][e - 1] = [
+                                deltaTime,
+                                {value: file.readInt(metaEventLength)}
+                            ];
                             break;
                         case 0x54:                                              // SMPTE Offset
                             MIDI.track[t-1].event[e-1].data    = [];
