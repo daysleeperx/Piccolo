@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .  --ext .ts",
+    "lint-fix": "eslint --fix .  --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,7 +19,13 @@
   },
   "homepage": "https://github.com/daysleeperx/Markov-Chain-Music-Demo#readme",
   "devDependencies": {
-    "@types/node": "^17.0.8"
+    "@types/node": "^17.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "typescript": "^4.5.5"
   },
   "dependencies": {
     "midi-converter": "^0.1.5",

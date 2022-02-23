@@ -38,7 +38,7 @@ export namespace Midi {
         controller: number;
         value: number;
     }
-    
+
     export interface ProgramChange extends ChannelMessage {
         preset: Preset;
     }
@@ -90,7 +90,7 @@ export namespace Midi {
     export interface Tempo {
         value: number;
     }
-    
+
     export interface EndOfTrack {}
 
     export interface SMPTEOffset {
@@ -102,10 +102,10 @@ export namespace Midi {
     }
 
     export interface TimeSignature {
-        numerator: number;   
-        denominator: number;   
-        clocks: number;   
-        bb: number;  // TODO: find better name  
+        numerator: number;
+        denominator: number;
+        clocks: number;
+        bb: number; // TODO: find better name
     }
 
     export interface KeySignature {
@@ -119,10 +119,10 @@ export namespace Midi {
 
     export interface SysEx {
         code: 240 | 247; // F0 or F7
-        data: any;                
+        data: any;
     }
 
-    export type Message = 
+    export type Message =
             | NoteOn
             | NoteOff
             | KeyPressure
@@ -147,7 +147,6 @@ export namespace Midi {
             | SequencerSpecific
             | SysEx;
 
-    
     export interface TicksPerBeat {
         ticksPerBeat: Ticks;
     }
@@ -182,7 +181,7 @@ export namespace Midi {
     export interface Builder {
         /**
          * MIDI Builder interface.
-         * @param {MidiFile} midi MidiFile object 
+         * @param {MidiFile} midi MidiFile object
          */
         build(midi: MidiFile): Buffer;
     }
