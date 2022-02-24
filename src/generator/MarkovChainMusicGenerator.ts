@@ -4,7 +4,7 @@ import { keyToNote, extractSequenceFromTrack } from './Utils';
 
 type TransitionMatrix = Map<string, Map<string, number>>;
 
-function getRandomSeqKey(matrix: Map<string, any>): string {
+function getRandomSeqKey(matrix: TransitionMatrix | Map<string, number>): string {
   return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
 }
 
