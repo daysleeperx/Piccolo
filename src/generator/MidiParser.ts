@@ -17,10 +17,10 @@ export class MidiParser implements Midi.Parser {
     if (!(input instanceof Uint8Array)) {
       throw new Error('Invalid input!');
     }
-    return this.Uint8(input);
+    return this.parseUint8(input);
   }
 
-  private Uint8(FileAsUint8Array: Buffer): Midi.MidiFile {
+  private parseUint8(FileAsUint8Array: Buffer): Midi.MidiFile {
     const file: File = {
       data: new DataView(FileAsUint8Array.buffer, FileAsUint8Array.byteOffset, FileAsUint8Array.byteLength),
       pointer: 0,

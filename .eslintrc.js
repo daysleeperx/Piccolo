@@ -1,10 +1,12 @@
 module.exports = {
     "env": {
         "browser": true,
+        "node": true,
         "es2021": true
     },
     "extends": [
-        "airbnb-base"
+        "airbnb-base",
+        "plugin:@typescript-eslint/recommended"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -15,5 +17,20 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
+        "no-useless-constructor": "off",
+        "@typescript-eslint/no-useless-constructor": ["error"],
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "ts": "never",
+                "tsx": "never"
+            }
+        ]
+    },
+    "settings": {
+        "import/resolver": {
+            "typescript": {}
+        }
     }
 }
