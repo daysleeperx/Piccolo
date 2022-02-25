@@ -1,6 +1,6 @@
 import { MusicGenerator } from './Generator';
-import { Midi } from './Parser';
-import { keyToNote, extractSequenceFromTrack } from './Utils';
+import { Midi } from '../parser/Parser';
+import { keyToNote, extractSequenceFromTrack } from '../common/Utils';
 
 type TransitionMatrix = Map<string, Map<string, number>>;
 
