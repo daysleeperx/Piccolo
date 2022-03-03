@@ -23,3 +23,22 @@ export function extractSequenceFromTrack(track: Midi.Track, tempo: Midi.Tempo, d
     },
   };
 }
+
+export function sequenceToMidiTrack(sequence: MusicGenerator.Sequence): Midi.Track {
+  return sequence.notes.flatMap(([pitch, steps]) => [
+    [0,
+      {
+        channel: 0,
+        note: pitch,
+        velocity: 67, // TODO: remove default velocity
+      },
+    ],
+    [steps,
+      {
+        channel: 0,
+        note: pitch,
+        velocity: 67, // TODO: remove default velocity
+      },
+    ],
+  ]);
+}

@@ -1,5 +1,3 @@
-import { readFileSync } from 'fs';
-import path from 'path';
 import { Midi } from './Parser';
 
 interface File {
@@ -293,14 +291,3 @@ export class MidiParser implements Midi.Parser {
     return midiFile;
   }
 }
-
-function main() {
-  const [file] = process.argv.slice(2);
-  const buffer = readFileSync(path.join(__dirname, file));
-
-  const parser: Midi.Parser = new MidiParser();
-  const { tracks }: Midi.MidiFile = parser.parse(buffer);
-  console.log(tracks[1].reverse());
-}
-
-main();
