@@ -9,7 +9,7 @@ export default class MidiBuilder implements Midi.Builder {
       format, ntrks, division, tracks,
     } = midi;
 
-    return midiConverter.jsonToMidi({
+    const midiSong = midiConverter.jsonToMidi({
       header: {
         formatType: format,
         trackCount: ntrks,
@@ -26,5 +26,7 @@ export default class MidiBuilder implements Midi.Builder {
           velocity: 67,
         }))),
     });
+
+    return Buffer.from(midiSong, 'binary');
   }
 }
