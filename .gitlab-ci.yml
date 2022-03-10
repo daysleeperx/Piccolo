@@ -9,7 +9,7 @@ build:
   stage: build
   artifacts:
     paths:
-      - dist
+      - lib
   cache:
     key: $CI_COMMIT_REF_NAME
     policy: push
@@ -28,6 +28,7 @@ lint:
       - node_modules
   script:
     - yarn run eslint src/**
+  allow_failure: true
 
 test:
   stage: test
@@ -38,7 +39,6 @@ test:
       - node_modules
   script:
     - yarn test
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
 
 publish:
   stage: publish
