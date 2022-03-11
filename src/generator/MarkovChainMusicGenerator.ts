@@ -47,6 +47,7 @@ function* generateSequence(current: MusicGenerator.Note[], transtions: Transitio
   yield next[next.length - 1];
   yield* generateSequence(next, transtions, step - 1);
 }
+
 export default class MarkovChainMusicGenerator implements MusicGenerator.Generator {
   constructor(
         private readonly midiParser: Midi.Parser,

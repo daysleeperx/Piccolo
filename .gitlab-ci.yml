@@ -1,0 +1,46 @@
+image: node:16
+
+stages:
+  - build
+  - test
+  - publish
+
+build:
+  stage: build
+  artifacts:
+    paths:
+      - lib
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: push
+    paths:
+      - node_modules
+  script:
+    - yarn
+    - yarn compile
+
+lint:
+  stage: test
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+  script:
+    - yarn run eslint src/**
+  allow_failure: true
+
+test:
+  stage: test
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+  script:
+    - yarn test
+
+publish:
+  stage: publish
+  script:
+    - echo 'publish'

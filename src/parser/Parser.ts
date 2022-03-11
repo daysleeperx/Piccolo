@@ -74,7 +74,6 @@ export namespace Midi {
     export interface Lyrics {
         value: string;
     }
-
     export interface Marker {
         value: string;
     }
