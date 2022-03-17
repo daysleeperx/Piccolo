@@ -24,6 +24,6 @@ export namespace MusicGenerator {
          * @param  {Buffer | string} input Raw data, base64 encoded data or path
          * @return {Buffer | string}       Raw data, base64 encoded data or path
          */
-        generate(input: Buffer | string): Buffer | string;
+        generate(input: Sequence): Sequence;
     }
 }
