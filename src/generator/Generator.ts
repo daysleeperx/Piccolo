@@ -2,7 +2,9 @@ export namespace MusicGenerator {
     /**
      * Internal music representation types and interfaces.
      */
-    export type Note = [pitch: number, quantizedSteps: number];
+    export type Pitch = number;
+    export type Steps = number;
+    export type Note = [pitch: Pitch, quantizedSteps: Steps];
 
     export interface Quantization {
         stepsPerQuater: number;
@@ -21,8 +23,8 @@ export namespace MusicGenerator {
     export interface Generator {
         /**
          * Generator interface for algorithmic music generation.
-         * @param  {Buffer | string} input Raw data, base64 encoded data or path
-         * @return {Buffer | string}       Raw data, base64 encoded data or path
+         * @param  {Sequence} input Input Sequence
+         * @return {Sequence}       Output Sequence
          */
         generate(input: Sequence): Sequence;
     }

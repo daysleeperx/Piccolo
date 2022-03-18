@@ -42,3 +42,7 @@ export function sequenceToMidiTrack(sequence: MusicGenerator.Sequence): Midi.Tra
     ],
   ]);
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

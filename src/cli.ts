@@ -2,12 +2,15 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { prompt } from 'enquirer';
 import ora from 'ora';
+import figlet from 'figlet';
 import { Midi } from './parser/Parser';
 import { MidiParser } from './parser/MidiParser';
 import MidiBuilder from './parser/MidiBuilder';
 import { MusicGenerator } from './generator/Generator';
 import MarkovChainMusicGenerator from './generator/MarkovChainMusicGenerator';
-import { extractSequenceFromTrack, sequenceToMidiTrack } from './common/Utils';
+import { extractSequenceFromTrack, sequenceToMidiTrack, sleep } from './common/Utils';
+import { OSC } from './osc/OSC';
+import OSCClient from './osc/OSCClient';
 
 interface CLIOptions {
     source: string;
@@ -23,11 +26,25 @@ class CLIApplication {
         private readonly parser: Midi.Parser,
         private readonly builder: Midi.Builder,
         private readonly generator: MusicGenerator.Generator,
+        private readonly oscClient: OSC.Client<MusicGenerator.Pitch>,
         private readonly options: CLIOptions,
   ) {}
 
+  private async sendOSCMessages(sequence: MusicGenerator.Sequence): Promise<void> {
+    const { notes, quantization } = sequence;
+
+    for (const [pitch, quantizedSteps] of notes) {
+      this.oscClient.send(pitch);
+      await sleep(quantizedSteps / quantization.stepsPerQuater * 1000);
+    }
+  }
+
   public async runCli(): Promise<void> {
-    const buffer: Buffer = readFileSync(path.join(__dirname, this.options.source));
+    const {
+      source, output, name, outputsNum,
+    } = this.options;
+
+    const buffer: Buffer = readFileSync(path.join(__dirname, source));
 
     const { format, tracks, division } : Midi.MidiFile = this.parser.parse(buffer);
 
@@ -38,15 +55,21 @@ class CLIApplication {
         name: 'response',
         message: 'The provided MIDI track includes multiple tracks. Enter source track number:',
       });
-      track = Number(response);
+      track = Math.min(Number(response), tracks.length - 1);
     }
 
     const spinner = ora('Generating sequences...').start();
 
-    const sequence: MusicGenerator.Sequence = extractSequenceFromTrack(tracks[track], { value: 120 }, division);
+    const sequence: MusicGenerator.Sequence = extractSequenceFromTrack(
+      tracks[track],
+      { value: 120 },
+      division,
+    );
 
-    [...Array(+this.options.outputsNum).keys()].forEach((i) => {
+    const sequences: MusicGenerator.Sequence[] = [];
+    [...Array(Number(outputsNum)).keys()].forEach((i) => {
       const generatedSequence: MusicGenerator.Sequence = this.generator.generate(sequence);
+      sequences.push(generatedSequence);
       const outMidi: Midi.MidiFile = {
         format,
         division,
@@ -54,14 +77,48 @@ class CLIApplication {
         tracks: [sequenceToMidiTrack(generatedSequence)],
       };
       const outBuffer: Buffer = this.builder.build(outMidi);
-      writeFileSync(`${this.options.output}/${this.options.name}_${i}.midi`, outBuffer);
+      writeFileSync(path.join(__dirname, `${output}/${name}_${i}.midi`), outBuffer);
     });
 
-    spinner.succeed('Done.');
+    await sleep(2000);
+
+    spinner.succeed(`Generated ${outputsNum} sequences.`);
+
+    const response = await prompt<{osc: string}>({
+      type: 'confirm',
+      name: 'osc',
+      message: 'Send sequence via OSC?'
+    });
+    console.log(response);
   }
 }
 
+async function generateAsciiArt() {
+  return new Promise((resolve, reject) => {
+    figlet.text(
+      'Music Generation',
+      {
+        font: 'Larry 3D',
+        horizontalLayout: 'default',
+        verticalLayout: 'default',
+      },
+      (err, data) => {
+        if (err) {
+          /* eslint-disable no-console */
+          console.log('Something went wrong...');
+          console.dir(err);
+          reject(err);
+        }
+        resolve(data);
+      },
+    );
+  });
+}
+
 async function main() {
+  /* eslint-disable no-console */
+  console.log(await generateAsciiArt());
+
   const options = await prompt<CLIOptions>([
     {
       type: 'input',
@@ -99,8 +156,16 @@ async function main() {
 
   const parser: Midi.Parser = new MidiParser();
   const builder: Midi.Builder = new MidiBuilder();
-  const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(Number(steps), Number(order));
-  const cliApp: CLIApplication = new CLIApplication(parser, builder, generator, options);
+  const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(
+    Number(steps),
+    Number(order),
+  );
+  const oscClient: OSC.Client<MusicGenerator.Pitch> = new OSCClient({
+    host: 'localhost',
+    port: 4560,
+    path: '/trigger/prophet',
+  });
+  const cliApp: CLIApplication = new CLIApplication(parser, builder, generator, oscClient, options);
 
   await cliApp.runCli();
 }
