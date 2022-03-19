@@ -3,6 +3,7 @@ import path from 'path';
 import { prompt } from 'enquirer';
 import ora from 'ora';
 import figlet from 'figlet';
+import { Presets, SingleBar } from 'cli-progress'
 import { Midi } from './parser/Parser';
 import { MidiParser } from './parser/MidiParser';
 import MidiBuilder from './parser/MidiBuilder';
@@ -33,10 +34,19 @@ class CLIApplication {
   private async sendOSCMessages(sequence: MusicGenerator.Sequence): Promise<void> {
     const { notes, quantization } = sequence;
 
+    this.oscClient.start();
+
+    const bar1 = new SingleBar({}, Presets.shades_classic);
+    bar1.start(notes.length, 0);
+    let count = 0;
     for (const [pitch, quantizedSteps] of notes) {
       this.oscClient.send(pitch);
+      bar1.update(++count);
       await sleep(quantizedSteps / quantization.stepsPerQuater * 1000);
     }
+
+    bar1.stop();
+    this.oscClient.close();
   }
 
   public async runCli(): Promise<void> {
@@ -66,10 +76,10 @@ class CLIApplication {
       division,
     );
 
-    const sequences: MusicGenerator.Sequence[] = [];
+    const sequences: Map<string, MusicGenerator.Sequence> = new Map();
     [...Array(Number(outputsNum)).keys()].forEach((i) => {
       const generatedSequence: MusicGenerator.Sequence = this.generator.generate(sequence);
-      sequences.push(generatedSequence);
+      sequences.set(`${output}/${name}_${i}.midi`, generatedSequence);
       const outMidi: Midi.MidiFile = {
         format,
         division,
@@ -84,12 +94,21 @@ class CLIApplication {
 
     spinner.succeed(`Generated ${outputsNum} sequences.`);
 
-    const response = await prompt<{osc: string}>({
+    const { osc } = await prompt<{osc: string}>({
       type: 'confirm',
       name: 'osc',
       message: 'Send sequence via OSC?'
     });
-    console.log(response);
+    
+    if (Boolean(osc)) {
+      const { seq } = await prompt<{ seq: string }>({
+        type: 'select',
+        name: 'seq',
+        message: 'Choose sequence',
+        choices: [...sequences.keys()],
+      });
+      this.sendOSCMessages(sequences.get(seq));
+    }
   }
 }
 
@@ -163,7 +182,7 @@ async function main() {
   const oscClient: OSC.Client<MusicGenerator.Pitch> = new OSCClient({
     host: 'localhost',
     port: 4560,
-    path: '/trigger/prophet',
+    path: '/melody/notes',
   });
   const cliApp: CLIApplication = new CLIApplication(parser, builder, generator, oscClient, options);
 

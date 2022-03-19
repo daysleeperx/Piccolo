@@ -11,9 +11,17 @@ export namespace OSC {
 
     export interface Client<Message> {
         /**
+         * Open the connection.
+         */
+        start(): void;
+        /**
          * Send OSC Message. 
          * @param {Message} message OSC Message 
          */
         send(message: Message): void;
+        /**
+         * Close the connection.
+         */
+        close(): void;
     }
 }
