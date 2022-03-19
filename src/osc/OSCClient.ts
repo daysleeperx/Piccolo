@@ -1,10 +1,7 @@
-import chalk from 'chalk';
 import { MusicGenerator } from '../generator/Generator';
 import { OSC } from './OSC';
 
 const OSCNative = require('osc-js');
-
-const { log } = console;
 
 export default class OSCClient implements OSC.Client<MusicGenerator.Pitch> {
   private osc: any;
@@ -13,8 +10,6 @@ export default class OSCClient implements OSC.Client<MusicGenerator.Pitch> {
     this.osc = new OSCNative({
       plugin: new OSCNative.DatagramPlugin({ send: { port: this.config.port } }),
     });
-    this.osc.on('open', () => log(chalk.white('OSC Client ready\n')));
-    this.osc.on('close', () => log(chalk.white('OSC Connection closed.\n')));
   }
 
   public start(): void {

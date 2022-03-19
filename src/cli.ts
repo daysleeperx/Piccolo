@@ -37,8 +37,8 @@ class CLIApplication {
     this.oscClient.start();
 
     const bar1 = new SingleBar({}, Presets.shades_classic);
-    bar1.start(notes.length, 0);
     let count = 0;
+    bar1.start(notes.length, count);
     for (const [pitch, quantizedSteps] of notes) {
       this.oscClient.send(pitch);
       bar1.update(++count);
