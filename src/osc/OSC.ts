@@ -15,8 +15,8 @@ export namespace OSC {
          */
         start(): void;
         /**
-         * Send OSC Message. 
-         * @param {Message} message OSC Message 
+         * Send OSC Message.
+         * @param {Message} message OSC Message
          */
         send(message: Message): void;
         /**

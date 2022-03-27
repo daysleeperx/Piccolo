@@ -3,14 +3,16 @@ import path from 'path';
 import { prompt } from 'enquirer';
 import ora from 'ora';
 import figlet from 'figlet';
-import { Presets, SingleBar } from 'cli-progress'
+import { Presets, SingleBar } from 'cli-progress';
 import { Command } from 'commander';
 import { Midi } from './parser/Parser';
 import { MidiParser } from './parser/MidiParser';
 import MidiBuilder from './parser/MidiBuilder';
 import { MusicGenerator } from './generator/Generator';
 import MarkovChainMusicGenerator from './generator/MarkovChainMusicGenerator';
-import { extractSequenceFromTrack, sequenceToMidiTrack, sleep } from './common/Utils';
+import {
+  extractSequenceFromTrack, log, sequenceToMidiTrack, sleep,
+} from './common/Utils';
 import { OSC } from './osc/OSC';
 import OSCClient from './osc/OSCClient';
 
@@ -33,20 +35,22 @@ class CLIApplication {
   ) {}
 
   private async sendOSCMessages(sequence: MusicGenerator.Sequence): Promise<void> {
-    const { notes, quantization } = sequence;
+    const { notes, quantization: { stepsPerQuater } } = sequence;
 
     this.oscClient.start();
 
-    const bar1 = new SingleBar({}, Presets.shades_classic);
-    let count = 0;
-    bar1.start(notes.length, count);
-    for (const [pitch, quantizedSteps] of notes) {
+    const bar = new SingleBar({}, Presets.shades_classic);
+    bar.start(notes.length, 0);
+
+    /* eslint-disable no-restricted-syntax */
+    for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
       this.oscClient.send(pitch);
-      bar1.update(++count);
-      await sleep(quantizedSteps / quantization.stepsPerQuater * 1000);
+      /* eslint-disable no-await-in-loop */
+      await sleep((quantizedSteps / stepsPerQuater) * 1000);
+      bar.update(idx + 1);
     }
 
-    bar1.stop();
+    bar.stop();
     this.oscClient.close();
   }
 
@@ -98,10 +102,10 @@ class CLIApplication {
     const { osc } = await prompt<{osc: string}>({
       type: 'confirm',
       name: 'osc',
-      message: 'Send sequence via OSC?'
+      message: 'Send sequence via OSC?',
     });
-    
-    if (Boolean(osc)) {
+
+    if (osc) {
       const { seq } = await prompt<{ seq: string }>({
         type: 'select',
         name: 'seq',
@@ -124,9 +128,7 @@ async function generateAsciiArt() {
       },
       (err, data) => {
         if (err) {
-          /* eslint-disable no-console */
-          console.log('Something went wrong...');
-          console.dir(err);
+          log('Something went wrong...', err);
           reject(err);
         }
         resolve(data);
@@ -147,12 +149,11 @@ function initCommander(): Command {
     .option('-s, --steps <value>')
     .option('-r, --order <value>')
     .parse(process.argv);
-  
+
   return program;
 }
 async function main() {
-  /* eslint-disable no-console */
-  console.log(await generateAsciiArt());
+  log(await generateAsciiArt());
   const program: Command = initCommander();
   let options: CLIOptions;
 
@@ -191,7 +192,7 @@ async function main() {
     ]);
   } else {
     options = program.opts() as CLIOptions;
-    console.log(options);
+    log(options);
   }
 
   const { steps, order } = options;
