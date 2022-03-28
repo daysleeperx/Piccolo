@@ -1,12 +1,12 @@
 import { prompt } from 'enquirer';
-import { Presets, SingleBar } from "cli-progress";
-import { readFileSync, writeFileSync } from "fs";
-import ora from "ora";
-import path from "path";
-import { extractSequenceFromTrack, sequenceToMidiTrack, sleep } from "./common/Utils";
-import { MusicGenerator } from "./generator/Generator";
-import { OSC } from "./osc/OSC";
-import { Midi } from "./parser/Parser";
+import { Presets, SingleBar } from 'cli-progress';
+import { readFileSync, writeFileSync } from 'fs';
+import ora from 'ora';
+import path from 'path';
+import { extractSequenceFromTrack, sequenceToMidiTrack, sleep } from './common/Utils';
+import { MusicGenerator } from './generator/Generator';
+import { OSC } from './osc/OSC';
+import { Midi } from './parser/Parser';
 
 export interface CLIOptions {
     source: string;
@@ -17,7 +17,7 @@ export interface CLIOptions {
     order: string;
 }
 
- export class CLIApplication {
+export class CLIApplication {
   constructor(
         private readonly parser: Midi.Parser,
         private readonly builder: Midi.Builder,
