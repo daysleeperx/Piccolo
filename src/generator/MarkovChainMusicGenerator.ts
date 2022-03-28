@@ -1,6 +1,5 @@
 import { MusicGenerator } from './Generator';
-import { Midi } from '../parser/Parser';
-import { keyToNote, extractSequenceFromTrack } from '../common/Utils';
+import { keyToNote } from '../common/Utils';
 
 type TransitionMatrix = Map<string, Map<string, number>>;
 
@@ -10,7 +9,7 @@ function getRandomSeqKey(matrix: TransitionMatrix | Map<string, number>): string
 
 function transitionMatrix(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
   return notes
-    .slice(order)
+    .slice(Math.min(order, notes.length - 1))
     .map((note: MusicGenerator.Note, idx: number) => [note, notes.slice(idx, idx + order)])
     .reduce(
       (acc, [curr, prev]) => {
@@ -29,7 +28,11 @@ function transitionMatrix(notes: MusicGenerator.Note[], order: number): Transiti
     );
 }
 
-function* generateSequence(current: MusicGenerator.Note[], transtions: TransitionMatrix, step: number): Generator<MusicGenerator.Note> {
+function* generateSequence(
+  current: MusicGenerator.Note[],
+  transtions: TransitionMatrix,
+  step: number,
+): Generator<MusicGenerator.Note> {
   let next: MusicGenerator.Note[];
 
   if (step === 0) {
@@ -50,28 +53,17 @@ function* generateSequence(current: MusicGenerator.Note[], transtions: Transitio
 
 export default class MarkovChainMusicGenerator implements MusicGenerator.Generator {
   constructor(
-        private readonly midiParser: Midi.Parser,
-        private readonly midiBuilder: Midi.Builder,
+        private readonly steps: number,
+        private readonly order: number,
   ) {}
 
-  public generate(input: string | Buffer): string | Buffer {
-    if (typeof input === 'string') {
-      throw new Error('Method not implemented!');
-    }
-
-    const midiFile: Midi.MidiFile = this.midiParser.parse(input);
-    const { format, tracks, division } = midiFile;
-
-    if (format !== Midi.FileFormat.SINGLE_TRACK) {
-      throw new Error('Invalid MIDI File Format!');
-    }
-
-    const { notes }: MusicGenerator.Sequence = extractSequenceFromTrack(tracks[0], { value: 120 }, division);
-    const transitions: TransitionMatrix = transitionMatrix(notes, 3);
+  public generate(input: MusicGenerator.Sequence): MusicGenerator.Sequence {
+    const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
+    const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(keyToNote);
-    const generatedSequence: MusicGenerator.Note[] = [...generateSequence(seed, transitions, 100)];
-    console.log(generatedSequence);
-
-    return this.midiBuilder.build(midiFile);
+    const generatedNotes: MusicGenerator.Note[] = [
+      ...generateSequence(seed, transitions, this.steps),
+    ];
+    return { quantization, tempo, notes: generatedNotes };
   }
 }

@@ -1,6 +1,12 @@
 import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 
+export const { log } = console;
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export const keyToNote = (seqKey: string) : MusicGenerator.Note => seqKey.split(':').map(Number) as MusicGenerator.Note;
 export const eventsToNote = ([_ticks, msg] : Midi.Event, [ticks, _msg] : Midi.Event) : MusicGenerator.Note => [(msg as Midi.NoteOn).note, ticks];
 
