@@ -64,6 +64,9 @@ export default class MarkovChainMusicGenerator implements MusicGenerator.Generat
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),
     ];
+    console.log('sequence', generatedNotes);
+    console.log('quantization', quantization);
+
     return { quantization, tempo, notes: generatedNotes };
   }
 }
