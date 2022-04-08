@@ -6,7 +6,7 @@ export namespace OSC {
     export interface ClientConfig {
         host: string;
         port: number;
-        path: string;
+        path?: string;
     }
 
     export interface Client<Message> {
@@ -18,7 +18,7 @@ export namespace OSC {
          * Send OSC Message.
          * @param {Message} message OSC Message
          */
-        send(message: Message): void;
+        send(path:string, message: Message): void;
         /**
          * Close the connection.
          */

@@ -48,3 +48,18 @@ export function sequenceToMidiTrack(sequence: MusicGenerator.Sequence): Midi.Tra
     ],
   ]);
 }
+
+export function quantizeSequence(sequence: MusicGenerator.Sequence): MusicGenerator.Sequence {
+  const { tempo, quantization, notes } : MusicGenerator.Sequence = sequence;
+  const grid: number[] = [...Array(7).keys()].map((n) => (quantization.stepsPerQuater / 4) * (2 ** n));
+
+  return {
+    tempo,
+    quantization,
+    notes: notes
+      .map(([pitch, duration]) => [
+        pitch, 
+        grid.reduce((acc, n) => (Math.abs(n - duration) < Math.abs(acc - duration) ? n : acc))
+    ]),
+  };
+}

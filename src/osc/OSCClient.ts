@@ -1,9 +1,8 @@
-import { MusicGenerator } from '../generator/Generator';
 import { OSC } from './OSC';
 
 const OSCNative = require('osc-js');
 
-export default class OSCClient implements OSC.Client<MusicGenerator.Pitch> {
+export default class OSCClient implements OSC.Client<number[]> {
   private osc: any;
 
   constructor(private readonly config: OSC.ClientConfig) {
@@ -16,8 +15,11 @@ export default class OSCClient implements OSC.Client<MusicGenerator.Pitch> {
     this.osc.open();
   }
 
-  public send(message: MusicGenerator.Pitch): void {
-    this.osc.send(new OSCNative.Message(this.config.path, message));
+  public send(path: string, message: number[]): void {
+    console.log('PATH', path);
+    // this.osc.send(new OSC.Message('/gen/sequence', 64, 66, 71, 73, 74, 66, 64, 73, 71, 66, 74, 73));
+    // this.osc.send(new OSC.Message('/gen/steps', 0.25, 0.25, 0.25, 0.25, 1, 1, 1, 1, 1, 1, 1, 1));
+    this.osc.send(new OSCNative.Message(path, ...message));
   }
 
   public close(): void {

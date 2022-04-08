@@ -98,7 +98,7 @@ async function main() {
     Number(steps),
     Number(order),
   );
-  const oscClient: OSC.Client<MusicGenerator.Pitch> = new OSCClient({
+  const oscClient: OSC.Client<number[]> = new OSCClient({
     host: 'localhost',
     port: 4560,
     path: '/melody/notes',

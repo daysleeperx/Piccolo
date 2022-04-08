@@ -1,9 +1,9 @@
 import { prompt } from 'enquirer';
-import { Presets, SingleBar } from 'cli-progress';
+// import { Presets, SingleBar } from 'cli-progress';
 import { readFileSync, writeFileSync } from 'fs';
 import ora from 'ora';
 import path from 'path';
-import { extractSequenceFromTrack, sequenceToMidiTrack, sleep } from './common/Utils';
+import { quantizeSequence, extractSequenceFromTrack, sequenceToMidiTrack, sleep } from './common/Utils';
 import { MusicGenerator } from './generator/Generator';
 import { OSC } from './osc/OSC';
 import { Midi } from './parser/Parser';
@@ -22,7 +22,7 @@ export class CLIApplication {
         private readonly parser: Midi.Parser,
         private readonly builder: Midi.Builder,
         private readonly generator: MusicGenerator.Generator,
-        private readonly oscClient: OSC.Client<MusicGenerator.Pitch>,
+        private readonly oscClient: OSC.Client<number[]>,
         private readonly options: CLIOptions,
   ) {}
 
@@ -44,6 +44,9 @@ export class CLIApplication {
       });
       track = Math.min(Number(response), tracks.length - 1);
     }
+    console.log('DIVISION:', division);
+    console.log('DIVISION:', format);
+    console.log('CHOSEN TRACK:', tracks[track]);
 
     const spinner = ora('Generating sequences...').start();
 
@@ -55,7 +58,7 @@ export class CLIApplication {
 
     const sequences: Map<string, MusicGenerator.Sequence> = new Map();
     [...Array(Number(outputsNum)).keys()].forEach((i) => {
-      const generatedSequence: MusicGenerator.Sequence = this.generator.generate(sequence);
+      const generatedSequence: MusicGenerator.Sequence = this.generator.generate(quantizeSequence(sequence));
       sequences.set(`${output}/${name}_${i}.midi`, generatedSequence);
       const outMidi: Midi.MidiFile = {
         format,
@@ -90,21 +93,29 @@ export class CLIApplication {
 
   private async sendOSCMessages(sequence: MusicGenerator.Sequence): Promise<void> {
     const { notes, quantization: { stepsPerQuater } } = sequence;
-
+    let [ pitches, durations ] : [number[], number[]] = [[], []];
+    notes.forEach(([pitch, duration]) => {
+      pitches.push(pitch);
+      durations.push(duration / stepsPerQuater);
+    })
     this.oscClient.start();
-
-    const bar = new SingleBar({}, Presets.shades_classic);
-    bar.start(notes.length, 0);
+    console.log("Pitches", pitches);
+    console.log("Durations", durations);
+    
+    this.oscClient.send('/gen/sequence', pitches);
+    this.oscClient.send('/gen/steps', durations);
+    // const bar = new SingleBar({}, Presets.shades_classic);
+    // bar.start(notes.length, 0);
 
     /* eslint-disable-next-line no-restricted-syntax */
-    for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
-      this.oscClient.send(pitch);
-      /* eslint-disable-next-line no-await-in-loop */
-      await sleep((quantizedSteps / stepsPerQuater) * 1000);
-      bar.update(idx + 1);
-    }
+    // for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
+    //   this.oscClient.send(pitch);
+    //   /* eslint-disable-next-line no-await-in-loop */
+    //   await sleep((quantizedSteps / stepsPerQuater) * 1000);
+    //   bar.update(idx + 1);
+    // }
 
-    bar.stop();
-    this.oscClient.close();
+    // bar.stop();
+    // this.oscClient.close();
   }
 }
