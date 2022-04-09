@@ -104,18 +104,7 @@ export class CLIApplication {
     
     this.oscClient.send('/gen/sequence', pitches);
     this.oscClient.send('/gen/steps', durations);
-    // const bar = new SingleBar({}, Presets.shades_classic);
-    // bar.start(notes.length, 0);
 
-    /* eslint-disable-next-line no-restricted-syntax */
-    // for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
-    //   this.oscClient.send(pitch);
-    //   /* eslint-disable-next-line no-await-in-loop */
-    //   await sleep((quantizedSteps / stepsPerQuater) * 1000);
-    //   bar.update(idx + 1);
-    // }
-
-    // bar.stop();
-    // this.oscClient.close();
+    this.oscClient.close();
   }
 }

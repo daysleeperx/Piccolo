@@ -28,8 +28,3 @@ live_loop :play_gen_sequence, sync: :beat do
     end
   end
 end
-
-live_loop :rhytm, sync: :beat do
-  play 64, release: 0.2, amp: 0
-  sleep 0.25
-end
