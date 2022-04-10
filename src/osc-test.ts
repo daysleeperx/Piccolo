@@ -10,4 +10,8 @@ osc.on('open', () => {
   setTimeout(() => osc.send(new OSC.Message('/gen/play', 1)), 3000);
 });
 
+osc.on('/hello/world', (message: any) => {
+  console.log(message);
+})
+
 osc.open({ port: 9912 }); // bind socket to localhost:9912
