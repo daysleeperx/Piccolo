@@ -10,7 +10,7 @@ import { Midi } from "../src/parser/Parser";
 
 jest.mock('enquirer');
 
-describe("Cli Application tests", () => {
+xdescribe("Cli Application tests", () => {
   test("run cli wihout errors", async () => {
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();

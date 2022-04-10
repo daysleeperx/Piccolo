@@ -24,7 +24,9 @@ export class CLIApplication {
         private readonly generator: MusicGenerator.Generator,
         private readonly oscClient: OSC.Client<number[]>,
         private readonly options: CLIOptions,
-  ) {}
+  ) {
+    this.oscClient.start();
+  }
 
   public async runCli(): Promise<void> {
     const {
@@ -74,37 +76,41 @@ export class CLIApplication {
 
     spinner.succeed(`Generated ${outputsNum} sequences.`);
 
-    const { osc } = await prompt<{osc: string}>({
-      type: 'confirm',
-      name: 'osc',
-      message: 'Send sequence via OSC?',
-    });
+    let osc : boolean = true;
+    
+    while (true) {
+      ({ osc } = await prompt<{osc: boolean}>({
+        type: 'confirm',
+        name: 'osc',
+        message: 'Send sequence via OSC?',
+      }));
 
-    if (osc) {
+      if (!osc) break;
+
       const { seq } = await prompt<{ seq: string }>({
         type: 'select',
         name: 'seq',
         message: 'Choose sequence',
         choices: [...sequences.keys()],
       });
+
       this.sendOSCMessages(sequences.get(seq));
     }
+
+    this.oscClient.close();
   }
 
-  private async sendOSCMessages(sequence: MusicGenerator.Sequence): Promise<void> {
+  private sendOSCMessages(sequence: MusicGenerator.Sequence): void {
     const { notes, quantization: { stepsPerQuater } } = sequence;
     let [ pitches, durations ] : [number[], number[]] = [[], []];
     notes.forEach(([pitch, duration]) => {
       pitches.push(pitch);
       durations.push(duration / stepsPerQuater);
     })
-    this.oscClient.start();
     console.log("Pitches", pitches);
     console.log("Durations", durations);
     
     this.oscClient.send('/gen/sequence', pitches);
     this.oscClient.send('/gen/steps', durations);
-
-    this.oscClient.close();
   }
 }
