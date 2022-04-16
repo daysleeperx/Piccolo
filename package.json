@@ -34,6 +34,7 @@
   "dependencies": {
     "@types/cli-progress": "^3.9.2",
     "@types/figlet": "^1.5.4",
+    "@types/node-osc": "^6.0.0",
     "chalk": "4.1.2",
     "cli-progress": "^3.10.0",
     "commander": "^9.1.0",
@@ -41,6 +42,7 @@
     "figlet": "^1.5.2",
     "midi-converter": "^0.1.5",
     "midi-parser-js": "^4.0.4",
+    "node-osc": "^6.1.16",
     "ora": "5.4.1",
     "osc-js": "^2.2.0"
   }

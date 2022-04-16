@@ -686,6 +686,11 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
+"@types/node-osc@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/node-osc/-/node-osc-6.0.0.tgz#6d22d0b94bf632c13fc6c4886de3518079b825e7"
+  integrity sha512-25DwJOFe1KueUZz2oIURT3qCMQ28Jdvy9JqGz8d0mKM1Mlx0agHD9N3S0hMKajVCjw7TGtf3gGjbl5gDCFfIWQ==
+
 "@types/node@*", "@types/node@^17.0.8":
   version "17.0.21"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.21.tgz#864b987c0c68d07b4345845c3e63b75edd143644"
@@ -1009,6 +1014,11 @@ base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
+binpack@~0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/binpack/-/binpack-0.1.0.tgz#bd3d0974c3f2a0446e17df4f60b55a72a205a97e"
+  integrity sha1-vT0JdMPyoERuF99PYLVacqIFqX4=
 
 bl@^4.1.0:
   version "4.1.0"
@@ -2887,6 +2897,13 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
+node-osc@^6.1.16:
+  version "6.1.16"
+  resolved "https://registry.yarnpkg.com/node-osc/-/node-osc-6.1.16.tgz#3764f44de852d8b4f7dd096e9b3339a82e72638d"
+  integrity sha512-BXLrzIz3dd21fMWJZvyHYIxnAI5fG8TDKZLIEkMR4ic+zne0seuvTlvIkE3NK0nUeynjvxq9BStSIi4mUeU5yg==
+  dependencies:
+    osc-min "^1.1.1"
+
 node-releases@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.2.tgz#7139fe71e2f4f11b47d4d2986aaf8c48699e0c01"
@@ -3007,6 +3024,13 @@ osc-js@^2.2.0:
   dependencies:
     isomorphic-ws "4.0.1"
     ws "8.5.0"
+
+osc-min@^1.1.1:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/osc-min/-/osc-min-1.1.2.tgz#3dcaff10f804c39b7080cf4c10fd7a4103cd9037"
+  integrity sha512-8DbiO8ME85R75stgNVCZtHxB9MNBBNcyy+isNBXrsFeinXGjwNAauvKVmGlfRas5VJWC/mhzIx7spR2gFvWxvg==
+  dependencies:
+    binpack "~0"
 
 p-limit@^1.1.0:
   version "1.3.0"

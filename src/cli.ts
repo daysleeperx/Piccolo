@@ -7,9 +7,8 @@ import MidiBuilder from './parser/MidiBuilder';
 import { MusicGenerator } from './generator/Generator';
 import MarkovChainMusicGenerator from './generator/MarkovChainMusicGenerator';
 import { log } from './common/Utils';
-import { OSC } from './osc/OSC';
-import OSCClient from './osc/OSCClient';
-import { CLIApplication, CLIOptions } from './CLIApplication';
+import * as OSC from 'node-osc';
+import { MidiSourceApp, MidiSourceAppOptions } from './app/MidiSourceApp';
 
 function initCommander(): Command {
   const program: Command = new Command();
@@ -17,11 +16,9 @@ function initCommander(): Command {
   program
     .name('music-generator')
     .option('-i, --source <value>')
-    .option('-o, --output <value>')
+    .option('-o, --out <value>')
     .option('-n, --name <value>')
-    .option('-nn, --outputsNum <value>')
-    .option('-s, --steps <value>')
-    .option('-r, --order <value>')
+    .option('-nn, --outputs <value>')
     .parse(process.argv);
 
   return program;
@@ -50,10 +47,10 @@ async function generateAsciiArt() {
 async function main() {
   log(await generateAsciiArt());
   const program: Command = initCommander();
-  let options: CLIOptions;
+  let options: MidiSourceAppOptions;
 
   if (Object.keys(program.opts()).length === 0) {
-    options = await prompt<CLIOptions>([
+    options = await prompt<MidiSourceAppOptions>([
       {
         type: 'input',
         name: 'source',
@@ -61,7 +58,7 @@ async function main() {
       },
       {
         type: 'input',
-        name: 'output',
+        name: 'out',
         message: 'Enter output direction path (relative):',
       },
       {
@@ -71,41 +68,22 @@ async function main() {
       },
       {
         type: 'input',
-        name: 'outputsNum',
+        name: 'outputs',
         message: 'Enter the number of outputs:',
-      },
-      {
-        type: 'input',
-        name: 'steps',
-        message: 'Enter the number of steps to be generated:',
-      },
-      {
-        type: 'input',
-        name: 'order',
-        message: 'Enter the order of Markov chain:',
-      },
+      }
     ]);
   } else {
-    options = program.opts() as CLIOptions;
+    options = program.opts() as MidiSourceAppOptions;
     log(options);
   }
 
-  const { steps, order } = options;
-
   const parser: Midi.Parser = new MidiParser();
   const builder: Midi.Builder = new MidiBuilder();
-  const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(
-    Number(steps),
-    Number(order),
-  );
-  const oscClient: OSC.Client<number[]> = new OSCClient({
-    host: 'localhost',
-    port: 4560,
-    path: '/melody/notes',
-  });
-  const cliApp: CLIApplication = new CLIApplication(parser, builder, generator, oscClient, options);
+  const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
+  const oscClient: OSC.Client= new OSC.Client('localhost', 4560);
+  const cliApp: MidiSourceApp = new MidiSourceApp(parser, builder, generator, oscClient, options);
 
-  await cliApp.runCli();
+  await cliApp.run();
 }
 
 main();
