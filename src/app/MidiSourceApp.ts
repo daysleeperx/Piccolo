@@ -6,6 +6,10 @@ import * as OSC from 'node-osc';
 import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 import Utils from '../common/Utils';
+import { CLIApplication } from './CLIApplication';
+import { MidiParser } from '../parser/MidiParser';
+import MidiBuilder from '../parser/MidiBuilder';
+import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -14,22 +18,34 @@ export interface MidiSourceAppOptions {
     name: string;
 }
 
-export class MidiSourceApp {
+export class MidiSourceApp implements CLIApplication {
   private midiFile: Midi.MidiFile;
 
   private source: MusicGenerator.Sequence;
-
+ 
   private currentPlaying: MusicGenerator.Sequence;
 
   private sequences: Map<string, MusicGenerator.Sequence> = new Map();
 
-  constructor(
+  private runCount: number = 0;
+
+  private shutdown: boolean = false;
+
+  private constructor(
        private readonly parser: Midi.Parser,
        private readonly builder: Midi.Builder,
        private readonly generator: MusicGenerator.Generator,
        private readonly oscClient: OSC.Client,
        private readonly options: MidiSourceAppOptions,
   ) {}
+
+  public static createAndInit(options: MidiSourceAppOptions): MidiSourceApp {
+    const parser: Midi.Parser = new MidiParser();
+    const builder: Midi.Builder = new MidiBuilder();
+    const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
+    const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
+    return new MidiSourceApp(parser, builder, generator, oscClient, options);
+  }
 
   private async readMidiFile(): Promise<void> {
     const { source } = this.options;
@@ -73,7 +89,7 @@ export class MidiSourceApp {
       writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
     });
 
-    await Utils.sleep(2000); /* Consmetic stuff */
+    await Utils.sleep(2000); /* Cosmetic stuff */
     spinner.succeed(`Generated ${outputs} sequences.`);
   }
 
@@ -93,13 +109,11 @@ export class MidiSourceApp {
     await this.readMidiFile();
     await this.generateSequences();
 
-    let runCount = 0;
-
-    while (true) {
+    while (!this.shutdown) {
       const { osc } = await prompt<{osc: boolean}>({
         type: 'confirm',
         name: 'osc',
-        message: `Send ${runCount === 0 ? '' : ' another'}sequence via OSC?`,
+        message: `Send ${this.runCount === 0 ? '' : 'another '}sequence via OSC?`,
       });
 
       if (!osc) break;
@@ -113,7 +127,7 @@ export class MidiSourceApp {
 
       this.currentPlaying = this.sequences.get(seq);
       this.sendOSCMessage();
-      runCount += 1;
+      this.runCount += 1;
     }
 
     this.oscClient.close();
