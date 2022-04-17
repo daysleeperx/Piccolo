@@ -16,7 +16,7 @@ export default class Utils {
   }
 
   public static extractSequenceFromTrack(track: Midi.Track, tempo: Midi.Tempo, division: Midi.TimeDivision): MusicGenerator.Sequence {
-    return {
+    return Utils.quantizeSequence({
       notes: track
         .filter(([_, msg]: Midi.Event) => Utils.isNoteMessage(msg))
         .map((e: Midi.Event, idx: number, xs: Midi.Event[]) => idx % 2 === 0 && Utils.eventsToNote(e, xs[idx + 1]))
@@ -27,7 +27,7 @@ export default class Utils {
       tempo: {
         bpm: tempo.value,
       },
-    };
+    });
   }
 
   public static sequenceToMidiTrack(sequence: MusicGenerator.Sequence): Midi.Track {

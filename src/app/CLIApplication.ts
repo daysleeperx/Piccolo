@@ -1,4 +1,4 @@
-import { MidiSourceApp, MidiSourceAppOptions } from './MidiSourceApp';
+import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
 
 /**
  * Represents a Command Line interface.
@@ -6,7 +6,7 @@ import { MidiSourceApp, MidiSourceAppOptions } from './MidiSourceApp';
 export type CLIOptions = MidiSourceAppOptions;
 
 export enum ApplicationMode {
-  MIDI_SOURCE,
+  MIDI,
   DIALOG,
   SEQUENTIAL
 }
@@ -26,8 +26,8 @@ export class CLIApplicationFactory {
    */
   public createApplication(mode: ApplicationMode, options: CLIOptions): CLIApplication {
     switch (mode) {
-      case ApplicationMode.MIDI_SOURCE:
-        return MidiSourceApp.createAndInit(options as MidiSourceAppOptions);
+      case ApplicationMode.MIDI:
+        return MidiApplication.createAndInit(options as MidiSourceAppOptions);
       case ApplicationMode.DIALOG:
         throw new Error('Not implemented!');
       case ApplicationMode.SEQUENTIAL:

@@ -18,18 +18,16 @@ export interface MidiSourceAppOptions {
     name: string;
 }
 
-export class MidiSourceApp implements CLIApplication {
+export class MidiApplication implements CLIApplication {
   private midiFile: Midi.MidiFile;
 
   private source: MusicGenerator.Sequence;
  
-  private currentPlaying: MusicGenerator.Sequence;
+  private currentSequence: MusicGenerator.Sequence;
 
   private sequences: Map<string, MusicGenerator.Sequence> = new Map();
 
-  private runCount: number = 0;
-
-  private shutdown: boolean = false;
+  private running: boolean = true;
 
   private constructor(
        private readonly parser: Midi.Parser,
@@ -39,12 +37,12 @@ export class MidiSourceApp implements CLIApplication {
        private readonly options: MidiSourceAppOptions,
   ) {}
 
-  public static createAndInit(options: MidiSourceAppOptions): MidiSourceApp {
+  public static createAndInit(options: MidiSourceAppOptions): MidiApplication {
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
     const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
-    return new MidiSourceApp(parser, builder, generator, oscClient, options);
+    return new MidiApplication(parser, builder, generator, oscClient, options);
   }
 
   private async readMidiFile(): Promise<void> {
@@ -65,9 +63,7 @@ export class MidiSourceApp implements CLIApplication {
       track = Math.min(Number(response), tracks.length - 1);
     }
 
-    this.source = Utils.quantizeSequence(
-      Utils.extractSequenceFromTrack(tracks[track], { value: 120 }, division),
-    );
+    this.source = Utils.extractSequenceFromTrack(tracks[track], { value: 120 }, division);
   }
 
   private async generateSequences(): Promise<void> {
@@ -94,7 +90,7 @@ export class MidiSourceApp implements CLIApplication {
   }
 
   private sendOSCMessage() {
-    const { notes, quantization: { stepsPerQuater } } = this.currentPlaying;
+    const { notes, quantization: { stepsPerQuater } } = this.currentSequence;
     const [pitches, durations] : [number[], number[]] = [[], []];
     notes.forEach(([pitch, duration]) => {
       pitches.push(pitch);
@@ -109,15 +105,13 @@ export class MidiSourceApp implements CLIApplication {
     await this.readMidiFile();
     await this.generateSequences();
 
-    while (!this.shutdown) {
-      const { osc } = await prompt<{osc: boolean}>({
-        type: 'confirm',
-        name: 'osc',
-        message: `Send ${this.runCount === 0 ? '' : 'another '}sequence via OSC?`,
-      });
-
-      if (!osc) break;
-
+    ({ sendOsc: this.running } = await prompt<{ sendOsc: boolean }>({
+      type: 'confirm',
+      name: 'sendOsc',
+      message: 'Send sequence via OSC?',
+    }));
+    
+    while (this.running) {
       const { seq } = await prompt<{ seq: string }>({
         type: 'select',
         name: 'seq',
@@ -125,9 +119,14 @@ export class MidiSourceApp implements CLIApplication {
         choices: [...this.sequences.keys()],
       });
 
-      this.currentPlaying = this.sequences.get(seq);
+      this.currentSequence = this.sequences.get(seq);
       this.sendOSCMessage();
-      this.runCount += 1;
+
+      ({ sendAnother: this.running } = await prompt<{ sendAnother: boolean }>({
+        type: 'confirm',
+        name: 'sendAnother',
+        message: 'Send another sequence via OSC?',
+      }));
     }
 
     this.oscClient.close();

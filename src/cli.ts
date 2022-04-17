@@ -1,7 +1,7 @@
 import { prompt } from 'enquirer';
 import figlet from 'figlet';
 import { Command } from 'commander';
-import { MidiSourceAppOptions } from './app/MidiSourceApp';
+import { MidiSourceAppOptions } from './app/MidiApplication';
 import { ApplicationMode, CLIApplication, CLIApplicationFactory } from './app/CLIApplication';
 
 function initCommander(): Command {
@@ -72,7 +72,7 @@ async function main() {
   }
 
   const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
-  const cliApp: CLIApplication = cliAppFactory.createApplication(ApplicationMode.MIDI_SOURCE, options);
+  const cliApp: CLIApplication = cliAppFactory.createApplication(ApplicationMode.MIDI, options);
   await cliApp.run();
 }
 
