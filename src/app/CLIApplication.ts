@@ -1,13 +1,14 @@
+import { DialogueApplication, DialogueApplicationOptions } from './DialogueApplication';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
 
 /**
  * Represents a Command Line interface.
  */
-export type CLIOptions = MidiSourceAppOptions;
+export type CLIOptions = MidiSourceAppOptions | DialogueApplicationOptions;
 
 export enum ApplicationMode {
   MIDI,
-  DIALOG,
+  DIALOGUE,
   SEQUENTIAL
 }
 export interface CLIApplication {
@@ -28,8 +29,8 @@ export class CLIApplicationFactory {
     switch (mode) {
       case ApplicationMode.MIDI:
         return MidiApplication.createAndInit(options as MidiSourceAppOptions);
-      case ApplicationMode.DIALOG:
-        throw new Error('Not implemented!');
+      case ApplicationMode.DIALOGUE:
+        return DialogueApplication.createAndInit(options as DialogueApplicationOptions);
       case ApplicationMode.SEQUENTIAL:
         throw new Error('Not implemented!');
     }
