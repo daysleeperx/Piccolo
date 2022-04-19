@@ -1,5 +1,6 @@
 import { DialogueApplication, DialogueApplicationOptions } from './DialogueApplication';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
+import { SequentialApplication } from './SequentialApplication';
 
 /**
  * Represents a Command Line interface.
@@ -25,14 +26,14 @@ export class CLIApplicationFactory {
    * @param {ApplicationMode} mode 
    * @returns {CLIApplication}
    */
-  public createApplication(mode: ApplicationMode, options: CLIOptions): CLIApplication {
+  public createApplication(mode: ApplicationMode): Promise<CLIApplication> {
     switch (mode) {
       case ApplicationMode.MIDI:
-        return MidiApplication.createAndInit(options as MidiSourceAppOptions);
+        return MidiApplication.createAndInit();
       case ApplicationMode.DIALOGUE:
-        return DialogueApplication.createAndInit(options as DialogueApplicationOptions);
+        return DialogueApplication.createAndInit();
       case ApplicationMode.SEQUENTIAL:
-        throw new Error('Not implemented!');
+        return SequentialApplication.createAndInit();
     }
   }
 }

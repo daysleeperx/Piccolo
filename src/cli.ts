@@ -42,37 +42,34 @@ async function main() {
   console.log(await generateAsciiArt());
   const program: Command = initCommander();
   let options: MidiSourceAppOptions;
+  let mode = 'MIDI';
+
+  const modes = new Map([
+    ['MIDI', ApplicationMode.MIDI],
+    ['DIALOGUE', ApplicationMode.DIALOGUE],
+    ['SEQUENTIAL', ApplicationMode.SEQUENTIAL],
+  ])
 
   if (Object.keys(program.opts()).length === 0) {
-    options = await prompt<MidiSourceAppOptions>([
-      {
-        type: 'input',
-        name: 'source',
-        message: 'Enter source MIDI file path (relative):',
-      },
-      {
-        type: 'input',
-        name: 'out',
-        message: 'Enter output direction path (relative):',
-      },
-      {
-        type: 'input',
-        name: 'name',
-        message: 'Enter the name of output file(s):',
-      },
-      {
-        type: 'input',
-        name: 'outputs',
-        message: 'Enter the number of outputs:',
-      }
-    ]);
+    ({ mode } = await prompt<{ mode: string }>({
+      type: 'select',
+      name: 'mode',
+      message: 'Choose application mode',
+      choices: [
+        {name: 'MIDI'},
+        {name: 'DIALOGUE'},
+        {name: 'SEQUENTIAL'}
+      ]
+    }));
   } else {
     options = program.opts() as MidiSourceAppOptions;
     console.log(options);
   }
 
+  console.log('mode', mode);
+  
   const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
-  const cliApp: CLIApplication = cliAppFactory.createApplication(ApplicationMode.MIDI, options);
+  const cliApp: CLIApplication = await cliAppFactory.createApplication(modes.get(mode));
   await cliApp.run();
 }
 

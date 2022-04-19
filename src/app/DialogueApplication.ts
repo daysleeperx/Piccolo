@@ -1,3 +1,4 @@
+import { prompt } from 'enquirer';
 import * as OSC from 'node-osc';
 import { MusicGenerator } from '../generator/Generator';
 import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
@@ -17,10 +18,20 @@ export class DialogueApplication implements CLIApplication {
         private readonly oscClient: OSC.Client,
   ) {}
 
-  public static createAndInit(options: DialogueApplicationOptions): DialogueApplication {
-    const {
-      server_port, server_hostname, client_port, client_hostname,
-    } = options;
+  public static async createAndInit(): Promise<DialogueApplication> {
+    const options: { options: DialogueApplicationOptions } = await prompt<{ options: DialogueApplicationOptions }>({
+      type: 'form',
+      name: 'options',
+      message: 'Please provide the following information',
+      choices: [
+        { name: 'server_port', message: 'Server Port'},
+        { name: 'server_hostname', message: 'Server Hostname'},
+        { name: 'client_port', message: 'Client port'},
+        { name: 'client_hostname', message: 'Client hostname'},
+      ]
+    });
+
+    const { server_port, server_hostname, client_port, client_hostname} = options.options;
     const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 2);
     const oscClient: OSC.Client = new OSC.Client(client_hostname, client_port);
     const oscServer: OSC.Server = new OSC.Server(server_port, server_hostname);

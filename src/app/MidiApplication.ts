@@ -19,30 +19,42 @@ export interface MidiSourceAppOptions {
 }
 
 export class MidiApplication implements CLIApplication {
-  private midiFile: Midi.MidiFile;
+  protected midiFile: Midi.MidiFile;
 
   private source: MusicGenerator.Sequence;
  
-  private currentSequence: MusicGenerator.Sequence;
+  protected currentSequence: MusicGenerator.Sequence;
 
   private sequences: Map<string, MusicGenerator.Sequence> = new Map();
 
   private running: boolean = true;
 
-  private constructor(
-       private readonly parser: Midi.Parser,
-       private readonly builder: Midi.Builder,
-       private readonly generator: MusicGenerator.Generator,
-       private readonly oscClient: OSC.Client,
-       private readonly options: MidiSourceAppOptions,
+  protected constructor(
+       protected readonly parser: Midi.Parser,
+       protected readonly builder: Midi.Builder,
+       protected readonly generator: MusicGenerator.Generator,
+       protected readonly oscClient: OSC.Client,
+       protected readonly options: MidiSourceAppOptions,
   ) {}
 
-  public static createAndInit(options: MidiSourceAppOptions): MidiApplication {
+  public static async createAndInit(): Promise<MidiApplication> {
+    const options: { options: MidiSourceAppOptions } = await prompt<{ options: MidiSourceAppOptions }>({
+      type: 'form',
+      name: 'options',
+      message: 'Please provide the following information',
+      choices: [
+        { name: 'source', message: 'Source'},
+        { name: 'out', message: 'Out'},
+        { name: 'outputs', message: 'No. of outputs'},
+        { name: 'name', message: 'Name of output file'},
+      ]
+    });
+
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
     const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
-    return new MidiApplication(parser, builder, generator, oscClient, options);
+    return new MidiApplication(parser, builder, generator, oscClient, options.options);
   }
 
   private async readMidiFile(): Promise<void> {
@@ -89,7 +101,7 @@ export class MidiApplication implements CLIApplication {
     spinner.succeed(`Generated ${outputs} sequences.`);
   }
 
-  private sendOSCMessage() {
+  protected async sendOSCMessage(): Promise<void> {
     const { notes, quantization: { stepsPerQuater } } = this.currentSequence;
     const [pitches, durations] : [number[], number[]] = [[], []];
     notes.forEach(([pitch, duration]) => {
@@ -120,7 +132,7 @@ export class MidiApplication implements CLIApplication {
       });
 
       this.currentSequence = this.sequences.get(seq);
-      this.sendOSCMessage();
+      await this.sendOSCMessage();
 
       ({ sendAnother: this.running } = await prompt<{ sendAnother: boolean }>({
         type: 'confirm',
