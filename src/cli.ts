@@ -4,6 +4,12 @@ import { Command } from 'commander';
 import { MidiSourceAppOptions } from './app/MidiApplication';
 import { ApplicationMode, CLIApplication, CLIApplicationFactory } from './app/CLIApplication';
 
+const modes = [
+  ApplicationMode.MIDI, 
+  ApplicationMode.DIALOGUE, 
+  ApplicationMode.SEQUENTIAL
+];
+
 function initCommander(): Command {
   const program: Command = new Command();
 
@@ -42,34 +48,29 @@ async function main() {
   console.log(await generateAsciiArt());
   const program: Command = initCommander();
   let options: MidiSourceAppOptions;
-  let mode = 'MIDI';
-
-  const modes = new Map([
-    ['MIDI', ApplicationMode.MIDI],
-    ['DIALOGUE', ApplicationMode.DIALOGUE],
-    ['SEQUENTIAL', ApplicationMode.SEQUENTIAL],
-  ])
+  let mode: number = 0;
 
   if (Object.keys(program.opts()).length === 0) {
-    ({ mode } = await prompt<{ mode: string }>({
+    ({ mode } = await prompt<{ mode: number }>({
       type: 'select',
       name: 'mode',
       message: 'Choose application mode',
       choices: [
-        {name: 'MIDI'},
-        {name: 'DIALOGUE'},
-        {name: 'SEQUENTIAL'}
-      ]
+        {name: 'MIDI', value: '0'},
+        {name: 'DIALOGUE', value: '1'},
+        {name: 'SEQUENTIAL', value: '2'}
+      ],
+      result() {
+        return (this as any).focused.value;
+      }
     }));
   } else {
     options = program.opts() as MidiSourceAppOptions;
     console.log(options);
   }
-
-  console.log('mode', mode);
   
   const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
-  const cliApp: CLIApplication = await cliAppFactory.createApplication(modes.get(mode));
+  const cliApp: CLIApplication = await cliAppFactory.createApplication(modes[Number(mode)]);
   await cliApp.run();
 }
 

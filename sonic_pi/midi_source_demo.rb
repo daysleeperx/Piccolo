@@ -4,8 +4,7 @@ live_loop :receive_sequence do
   use_real_time
   seq = sync "/osc*/gen/sequence"
   s = sync "/osc*/gen/steps"
-  set :sequence, seq
-  set :steps, s
+  set :sequence, seq.zip(s)
 end
 
 live_loop :beat do
@@ -14,17 +13,26 @@ live_loop :beat do
 end
 
 live_loop :play_gen_sequence, sync: :beat do
-  gen_notes = get[:sequence] || []
-  gen_steps = get[:steps] || []
-  notes = gen_notes.zip(gen_steps)
+  use_synth :piano
+  notes = get[:sequence] || []
   puts notes
   
   if notes.empty?
     sleep 1
   else
     notes.each do |note, step|
-      play note, release: 0.1
+      play note, release: 1, amp: 0.4, sustain: 0.5
       sleep step
     end
   end
 end
+
+live_loop :rhytm, sync: :beat do
+  use_synth :piano
+  bass = (ring :Fs1, :Cs1, :E1, :Fs1, :E1, :Cs1, :B0, :Cs1)
+  play bass.tick, amp: 0.2
+  sleep 0.5
+end
+
+
+

@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { prompt } from 'enquirer';
 import * as OSC from 'node-osc';
 import { MusicGenerator } from '../generator/Generator';
@@ -34,11 +35,17 @@ export class DialogueApplication implements CLIApplication {
     const { server_port, server_hostname, client_port, client_hostname} = options.options;
     const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 2);
     const oscClient: OSC.Client = new OSC.Client(client_hostname, client_port);
-    const oscServer: OSC.Server = new OSC.Server(server_port, server_hostname);
+    const oscServer: OSC.Server = new OSC.Server(
+      server_port, 
+      server_hostname, 
+      () => console.log(chalk.whiteBright(`OSC Server is listening at port ${server_port}. Press CTRL + C to quit.`))
+    );
     return new DialogueApplication(generator, oscServer, oscClient);
   }
 
   private generateSequence(message: any): void {
+    console.log(chalk.white(`OSC message received: ${message}`));
+    
     const sequence : MusicGenerator.Sequence = {
       notes: JSON.parse(message.args[0]),
       tempo: { bpm: 120 },
