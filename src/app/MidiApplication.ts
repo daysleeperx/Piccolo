@@ -84,8 +84,8 @@ export class MidiApplication implements CLIApplication {
     const { format, division } = this.midiFile;
     const { out, name, outputs } = this.options;
 
-    [...Array(Number(outputs)).keys()].forEach((i) => {
-      const generatedSequence: MusicGenerator.Sequence = this.generator.generate(this.source);
+    for (let i = 0; i < outputs; i++) {
+      const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
       this.sequences.set(`${out}/${name}_${i}.midi`, generatedSequence);
       const outMidi: Midi.MidiFile = {
         format,
@@ -95,7 +95,7 @@ export class MidiApplication implements CLIApplication {
       };
       const outBuffer: Buffer = this.builder.build(outMidi);
       writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
-    });
+    };
 
     await Utils.sleep(2000); /* Cosmetic stuff */
     spinner.succeed(`Generated ${outputs} sequences.`);

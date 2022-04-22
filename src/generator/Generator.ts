@@ -26,6 +26,6 @@ export namespace MusicGenerator {
          * @param  {Sequence} input Input Sequence
          * @return {Sequence}       Output Sequence
          */
-        generate(input: Sequence): Sequence;
+        generate(input: Sequence): Promise<Sequence>;
     }
 }

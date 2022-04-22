@@ -44,7 +44,7 @@ export class DialogueApplication implements CLIApplication {
   }
 
   private setupOsc(): void {
-    this.oscServer.on('/gen/sequence', (message: any) => {
+    this.oscServer.on('/gen/sequence', async (message: any) => {
       console.log(chalk.white(`OSC message received: ${message}`));
       const [_, msg] = message;
       
@@ -54,7 +54,7 @@ export class DialogueApplication implements CLIApplication {
         quantization: { stepsPerQuater: 1 },
       };
 
-      const genSequence : MusicGenerator.Sequence = this.generator.generate(sequence);
+      const genSequence : MusicGenerator.Sequence = await this.generator.generate(sequence);
 
       const [notes, steps] : [number[], number[]] = [[], []];
       genSequence.notes.forEach(([note, step]) => {

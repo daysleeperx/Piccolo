@@ -57,7 +57,7 @@ export default class MarkovChainMusicGenerator implements MusicGenerator.Generat
         private readonly order: number,
   ) {}
 
-  public generate(input: MusicGenerator.Sequence): MusicGenerator.Sequence {
+  public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
     const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
