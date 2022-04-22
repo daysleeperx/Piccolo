@@ -1,5 +1,5 @@
 import { MusicGenerator } from './Generator';
-import { keyToNote } from '../common/Utils';
+import Utils from '../common/Utils';
 
 type TransitionMatrix = Map<string, Map<string, number>>;
 
@@ -41,10 +41,10 @@ function* generateSequence(
 
   const seqKey: string = current.map<string>(([pitch, duration]) => `${pitch}:${duration}`).join('->');
   if (transtions.has(seqKey)) {
-    const nextNote = keyToNote(getRandomSeqKey(transtions.get(seqKey)));
+    const nextNote = Utils.keyToNote(getRandomSeqKey(transtions.get(seqKey)));
     next = [...current.slice(1), nextNote];
   } else {
-    next = getRandomSeqKey(transtions).split('->').map(keyToNote);
+    next = getRandomSeqKey(transtions).split('->').map(Utils.keyToNote);
   }
 
   yield next[next.length - 1];
@@ -60,7 +60,7 @@ export default class MarkovChainMusicGenerator implements MusicGenerator.Generat
   public generate(input: MusicGenerator.Sequence): MusicGenerator.Sequence {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
     const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
-    const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(keyToNote);
+    const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),
     ];
