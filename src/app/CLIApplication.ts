@@ -12,6 +12,7 @@ export enum ApplicationMode {
   DIALOGUE,
   SEQUENTIAL
 }
+
 export interface CLIApplication {
   /**
    * Main method.

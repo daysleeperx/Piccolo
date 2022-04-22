@@ -55,6 +55,5 @@ export class SequentialApplication extends MidiApplication {
         }
     
         bar.stop();
-        this.oscClient.close();
     }
 }
