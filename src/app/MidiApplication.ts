@@ -9,7 +9,8 @@ import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
 import { MidiParser } from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
-import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
+import { MagentaMusicRNNGenerator } from '../generator/MagentaMusicRNNGenerator';
+// import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -52,7 +53,8 @@ export class MidiApplication implements CLIApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
+    // const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 1);
+    const generator: MusicGenerator.Generator = await MagentaMusicRNNGenerator.createAndInit();
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new MidiApplication(parser, builder, generator, oscClient, options.options);
   }
@@ -64,6 +66,11 @@ export class MidiApplication implements CLIApplication {
 
     this.midiFile = this.parser.parse(buffer);
     const { format, tracks, division } : Midi.MidiFile = this.midiFile;
+    
+    console.log('TRACK 2', tracks[0]);
+    console.log('TRACk 1', tracks[1]);
+    console.log('DIVISION', division);
+    
 
     let track = 0;
     if (format !== Midi.FileFormat.SINGLE_TRACK) {
@@ -86,7 +93,7 @@ export class MidiApplication implements CLIApplication {
 
     for (let i = 0; i < outputs; i++) {
       const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
-      this.sequences.set(`${out}/${name}_${i}.midi`, generatedSequence);
+      this.sequences.set(`${out}/${name}_${i}.midi`, Utils.quantizeSequence(generatedSequence));
       const outMidi: Midi.MidiFile = {
         format,
         division,
