@@ -7,7 +7,7 @@ export namespace MusicGenerator {
     export type Note = [pitch: Pitch, quantizedSteps: Steps];
 
     export interface Quantization {
-        stepsPerQuater: number;
+        stepsPerQuater: Steps;
     }
 
     export interface Tempo {

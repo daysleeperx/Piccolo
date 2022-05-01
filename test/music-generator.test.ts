@@ -16,6 +16,7 @@ describe('Markov Chains Music Generator Tests', () => {
         generator = new MarkovChainMusicGenerator(10, 1);
 
         const { tracks, division } = parser.parse(buffer);
+        console.log(tracks[1]);
         const sequence: MusicGenerator.Sequence = Utils.extractSequenceFromTrack(tracks[1], { value: 120}, division);
         const generatedSequence: MusicGenerator.Sequence = await generator.generate(sequence);
 

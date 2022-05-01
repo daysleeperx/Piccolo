@@ -6,7 +6,7 @@ import Utils from '../common/Utils';
 type TransitionMatrix = Map<string, Map<string, number>>;
 
 // function printTransitionMatrix(matrix: TransitionMatrix): void {
-//   const pt = new PrettyTable();
+//   // const pt = new PrettyTable();
 //   const headers: Set<string> = new Set();
 //   const rows = [];
 // 
@@ -24,9 +24,17 @@ type TransitionMatrix = Map<string, Map<string, number>>;
 //     rows.push(row);
 //   }
 // 
+//   for (const row of rows) {
+//     const sum = row.slice(1).map(Number).reduce((a, b) => a + b, 0);
+//     for (let col = 1; col < row.length; col++) {
+//       row[col] = (+row[col] / sum).toString();
+//     }
+//   }
+// 
 //   pt.create(['current', ...headers], rows);
 //   pt.print();
 // }
+
 function getRandomSeqKey(matrix: TransitionMatrix | Map<string, number>): string {
   return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
 }

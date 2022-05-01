@@ -53,7 +53,7 @@ export class MidiApplication implements CLIApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    // const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 1);
+    // const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 2);
     const generator: MusicGenerator.Generator = await MagentaMusicRNNGenerator.createAndInit();
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new MidiApplication(parser, builder, generator, oscClient, options.options);
