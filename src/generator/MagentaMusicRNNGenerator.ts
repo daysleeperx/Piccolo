@@ -3,6 +3,11 @@ import { MusicRNN  } from "@magenta/music/node/music_rnn";
 import { sequences } from '@magenta/music/node/core';
 import { MusicGenerator } from "./Generator";
 
+export interface MagentaMusicRNNGeneratorOptions {
+    steps: number;
+    temperature: number;
+    chordProgression: string[];
+}
 export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
     private constructor(
         private readonly musicRnn: MusicRNN,
@@ -11,10 +16,11 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
         private readonly chordProgression: string[],
     ) {}
 
-    public static async createAndInit(): Promise<MagentaMusicRNNGenerator> {
+    public static async createAndInit(options: MagentaMusicRNNGeneratorOptions): Promise<MagentaMusicRNNGenerator> {
+        const { steps, temperature, chordProgression } = options;
         const musicRnn = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv');
         await musicRnn.initialize();
-        return new MagentaMusicRNNGenerator(musicRnn, 100, 1, ['A6', 'B6', 'A', 'B6']);
+        return new MagentaMusicRNNGenerator(musicRnn, steps, temperature, chordProgression);
     }
 
     public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {

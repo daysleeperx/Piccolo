@@ -9,8 +9,8 @@ import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
 import { MidiParser } from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
-import { MagentaMusicRNNGenerator } from '../generator/MagentaMusicRNNGenerator';
-// import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
+//import { MagentaMusicRNNGenerator } from '../generator/MagentaMusicRNNGenerator';
+import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -53,8 +53,8 @@ export class MidiApplication implements CLIApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    // const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 2);
-    const generator: MusicGenerator.Generator = await MagentaMusicRNNGenerator.createAndInit();
+    const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(4, 2);
+    //const generator: MusicGenerator.Generator = await MagentaMusicRNNGenerator.createAndInit();
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new MidiApplication(parser, builder, generator, oscClient, options.options);
   }

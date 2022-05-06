@@ -27,7 +27,7 @@ export class CLIApplicationFactory {
    * @param {ApplicationMode} mode 
    * @returns {CLIApplication}
    */
-  public createApplication(mode: ApplicationMode): Promise<CLIApplication> {
+  public async createApplication(mode: ApplicationMode): Promise<CLIApplication> {
     switch (mode) {
       case ApplicationMode.MIDI:
         return MidiApplication.createAndInit();

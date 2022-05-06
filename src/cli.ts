@@ -27,7 +27,7 @@ function initCommander(): Command {
 async function generateAsciiArt() {
   return new Promise((resolve, reject) => {
     figlet.text(
-      'Music Generation',
+      'Piccolo',
       {
         font: 'Larry 3D',
         horizontalLayout: 'default',

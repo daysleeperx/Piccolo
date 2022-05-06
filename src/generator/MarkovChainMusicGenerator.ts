@@ -83,7 +83,11 @@ function* generateSequence(
   yield* generateSequence(next, transtions, step - 1);
 }
 
-export default class MarkovChainMusicGenerator implements MusicGenerator.Generator {
+export interface MarkovChainMusicGeneratorOptions {
+  steps: number;
+  order: number;
+}
+export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
   constructor(
         private readonly steps: number,
         private readonly order: number,

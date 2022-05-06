@@ -15,8 +15,14 @@ describe('Markov Chains Music Generator Tests', () => {
         const buffer = readFileSync(path.join(__dirname, './data/twinkle_twinkle.midi'));
         generator = new MarkovChainMusicGenerator(10, 1);
 
-        const { tracks, division } = parser.parse(buffer);
+        const midiFile = parser.parse(buffer);
+        const { format, division, tracks } = midiFile;
+
+        console.log(midiFile);
+        console.log(format);
+        console.log(division);
         console.log(tracks[1]);
+
         const sequence: MusicGenerator.Sequence = Utils.extractSequenceFromTrack(tracks[1], { value: 120}, division);
         const generatedSequence: MusicGenerator.Sequence = await generator.generate(sequence);
 
