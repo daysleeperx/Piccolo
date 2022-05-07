@@ -5,9 +5,9 @@ import { MidiSourceAppOptions } from './app/MidiApplication';
 import { ApplicationMode, CLIApplication, CLIApplicationFactory } from './app/CLIApplication';
 
 const modes = [
-  ApplicationMode.MIDI, 
-  ApplicationMode.DIALOGUE, 
-  ApplicationMode.SEQUENTIAL
+  ApplicationMode.MIDI,
+  ApplicationMode.DIALOGUE,
+  ApplicationMode.SEQUENTIAL,
 ];
 
 function initCommander(): Command {
@@ -48,7 +48,7 @@ async function main() {
   console.log(await generateAsciiArt());
   const program: Command = initCommander();
   let options: MidiSourceAppOptions;
-  let mode: number = 0;
+  let mode = 0;
 
   if (Object.keys(program.opts()).length === 0) {
     ({ mode } = await prompt<{ mode: number }>({
@@ -56,19 +56,19 @@ async function main() {
       name: 'mode',
       message: 'Choose application mode',
       choices: [
-        {name: 'MIDI', value: '0'},
-        {name: 'DIALOGUE', value: '1'},
-        {name: 'SEQUENTIAL', value: '2'}
+        { name: 'MIDI', value: '0' },
+        { name: 'DIALOGUE', value: '1' },
+        { name: 'SEQUENTIAL', value: '2' },
       ],
       result() {
         return (this as any).focused.value;
-      }
+      },
     }));
   } else {
     options = program.opts() as MidiSourceAppOptions;
     console.log(options);
   }
-  
+
   const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
   const cliApp: CLIApplication = await cliAppFactory.createApplication(modes[Number(mode)]);
   await cliApp.run();

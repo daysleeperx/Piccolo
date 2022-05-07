@@ -2,12 +2,12 @@ import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 
 export default class Utils {
-
   public static async sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   public static keyToNote = (seqKey: string) : MusicGenerator.Note => seqKey.split(':').map(Number) as MusicGenerator.Note;
+
   public static eventsToNote = ([_ticks, msg] : Midi.Event, [ticks, _msg] : Midi.Event) : MusicGenerator.Note => [(msg as Midi.NoteOn).note, ticks];
 
   public static isNoteMessage(msg: Midi.Message): msg is Midi.NoteOn | Midi.NoteOff {
@@ -58,9 +58,9 @@ export default class Utils {
       quantization,
       notes: notes
         .map(([pitch, duration]) => [
-          pitch, 
-          grid.reduce((acc, n) => (Math.abs(n - duration) < Math.abs(acc - duration) ? n : acc))
-      ]),
+          pitch,
+          grid.reduce((acc, n) => (Math.abs(n - duration) < Math.abs(acc - duration) ? n : acc)),
+        ]),
     };
   }
 }

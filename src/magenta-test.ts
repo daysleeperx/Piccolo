@@ -44,10 +44,10 @@ const TWINKLE_TWINKLE = {
     { pitch: 62, startTime: 21, endTime: 21.5 },
     { pitch: 60, startTime: 21.5, endTime: 21.75 },
     { pitch: 60, startTime: 21.75, endTime: 22 },
-    { pitch: 58, startTime: 22, endTime: 23 }
+    { pitch: 58, startTime: 22, endTime: 23 },
   ],
-  totalTime: 23
-}
+  totalTime: 23,
+};
 
 async function main() {
   const music_rnn = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/basic_rnn');
@@ -63,4 +63,3 @@ async function main() {
 }
 
 main();
-

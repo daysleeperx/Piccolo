@@ -9,13 +9,13 @@ type TransitionMatrix = Map<string, Map<string, number>>;
 //   // const pt = new PrettyTable();
 //   const headers: Set<string> = new Set();
 //   const rows = [];
-// 
+//
 //   for (const [_, v] of matrix.entries()) {
 //     for (const k of v.keys()) {
 //       headers.add(k);
 //     }
 //   }
-// 
+//
 //   for (const current of matrix.keys()) {
 //     const row = [current];
 //     for (const header of headers) {
@@ -23,14 +23,14 @@ type TransitionMatrix = Map<string, Map<string, number>>;
 //     }
 //     rows.push(row);
 //   }
-// 
+//
 //   for (const row of rows) {
 //     const sum = row.slice(1).map(Number).reduce((a, b) => a + b, 0);
 //     for (let col = 1; col < row.length; col++) {
 //       row[col] = (+row[col] / sum).toString();
 //     }
 //   }
-// 
+//
 //   pt.create(['current', ...headers], rows);
 //   pt.print();
 // }
@@ -88,10 +88,15 @@ export interface MarkovChainMusicGeneratorOptions {
   order: number;
 }
 export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
-  constructor(
+  private constructor(
         private readonly steps: number,
         private readonly order: number,
   ) {}
+
+  public static async createAndInit(options: MarkovChainMusicGeneratorOptions): Promise<MarkovChainMusicGenerator> {
+    const { steps, order } = options;
+    return new MarkovChainMusicGenerator(+steps, +order);
+  }
 
   public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;

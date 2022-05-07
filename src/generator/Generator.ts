@@ -1,5 +1,5 @@
-import { MagentaMusicRNNGenerator, MagentaMusicRNNGeneratorOptions } from "./MagentaMusicRNNGenerator";
-import { MarkovChainMusicGenerator, MarkovChainMusicGeneratorOptions } from "./MarkovChainMusicGenerator";
+import { MagentaMusicRNNGenerator, MagentaMusicRNNGeneratorOptions } from './MagentaMusicRNNGenerator';
+import { MarkovChainMusicGenerator, MarkovChainMusicGeneratorOptions } from './MarkovChainMusicGenerator';
 
 export namespace MusicGenerator {
     /**
@@ -23,7 +23,6 @@ export namespace MusicGenerator {
         tempo: Tempo;
     }
 
-    
     export type GeneratorOptions = MarkovChainMusicGeneratorOptions | MagentaMusicRNNGeneratorOptions;
 
     export enum GeneratorType {
@@ -41,14 +40,13 @@ export namespace MusicGenerator {
     }
 
     export class GeneratorFactory {
-        public async createGenerator(type: GeneratorType, options: GeneratorOptions) {
-            switch (type) {
-                case GeneratorType.MARKOV_CHAIN:
-                    const { steps, order } = options as MarkovChainMusicGeneratorOptions;
-                    return new MarkovChainMusicGenerator(steps, order);
-                case GeneratorType.MAGNETA_MUSIC_RNN:
-                    return MagentaMusicRNNGenerator.createAndInit(options as MagentaMusicRNNGeneratorOptions);
-            }
+      public async createGenerator(type: GeneratorType, options: GeneratorOptions) {
+        switch (type) {
+          case GeneratorType.MARKOV_CHAIN:
+            return MarkovChainMusicGenerator.createAndInit(options as MarkovChainMusicGeneratorOptions);
+          case GeneratorType.MAGNETA_MUSIC_RNN:
+            return MagentaMusicRNNGenerator.createAndInit(options as MagentaMusicRNNGeneratorOptions);
         }
+      }
     }
 }
