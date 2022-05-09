@@ -1,3 +1,6 @@
+import { MagentaMusicRNNGenerator, MagentaMusicRNNGeneratorOptions } from './MagentaMusicRNNGenerator';
+import { MarkovChainMusicGenerator, MarkovChainMusicGeneratorOptions } from './MarkovChainMusicGenerator';
+
 export namespace MusicGenerator {
     /**
      * Internal music representation types and interfaces.
@@ -7,7 +10,7 @@ export namespace MusicGenerator {
     export type Note = [pitch: Pitch, quantizedSteps: Steps];
 
     export interface Quantization {
-        stepsPerQuater: number;
+        stepsPerQuater: Steps;
     }
 
     export interface Tempo {
@@ -20,12 +23,30 @@ export namespace MusicGenerator {
         tempo: Tempo;
     }
 
+    export type GeneratorOptions = MarkovChainMusicGeneratorOptions | MagentaMusicRNNGeneratorOptions;
+
+    export enum GeneratorType {
+        MARKOV_CHAIN,
+        MAGNETA_MUSIC_RNN
+    }
+
     export interface Generator {
         /**
          * Generator interface for algorithmic music generation.
          * @param  {Sequence} input Input Sequence
          * @return {Sequence}       Output Sequence
          */
-        generate(input: Sequence): Sequence;
+        generate(input: Sequence): Promise<Sequence>;
+    }
+
+    export class GeneratorFactory {
+      public async createGenerator(type: GeneratorType, options: GeneratorOptions) {
+        switch (type) {
+          case GeneratorType.MARKOV_CHAIN:
+            return MarkovChainMusicGenerator.createAndInit(options as MarkovChainMusicGeneratorOptions);
+          case GeneratorType.MAGNETA_MUSIC_RNN:
+            return MagentaMusicRNNGenerator.createAndInit(options as MagentaMusicRNNGeneratorOptions);
+        }
+      }
     }
 }

@@ -2,12 +2,12 @@ import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 
 export default class Utils {
-
   public static async sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   public static keyToNote = (seqKey: string) : MusicGenerator.Note => seqKey.split(':').map(Number) as MusicGenerator.Note;
+
   public static eventsToNote = ([_ticks, msg] : Midi.Event, [ticks, _msg] : Midi.Event) : MusicGenerator.Note => [(msg as Midi.NoteOn).note, ticks];
 
   public static isNoteMessage(msg: Midi.Message): msg is Midi.NoteOn | Midi.NoteOff {
@@ -16,7 +16,7 @@ export default class Utils {
   }
 
   public static extractSequenceFromTrack(track: Midi.Track, tempo: Midi.Tempo, division: Midi.TimeDivision): MusicGenerator.Sequence {
-    return Utils.quantizeSequence({
+    return {
       notes: track
         .filter(([_, msg]: Midi.Event) => Utils.isNoteMessage(msg))
         .map((e: Midi.Event, idx: number, xs: Midi.Event[]) => idx % 2 === 0 && Utils.eventsToNote(e, xs[idx + 1]))
@@ -27,7 +27,7 @@ export default class Utils {
       tempo: {
         bpm: tempo.value,
       },
-    });
+    };
   }
 
   public static sequenceToMidiTrack(sequence: MusicGenerator.Sequence): Midi.Track {
@@ -58,9 +58,9 @@ export default class Utils {
       quantization,
       notes: notes
         .map(([pitch, duration]) => [
-          pitch, 
-          grid.reduce((acc, n) => (Math.abs(n - duration) < Math.abs(acc - duration) ? n : acc))
-      ]),
+          pitch,
+          grid.reduce((acc, n) => (Math.abs(n - duration) < Math.abs(acc - duration) ? n : acc)),
+        ]),
     };
   }
 }

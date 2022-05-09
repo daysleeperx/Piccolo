@@ -1,7 +1,39 @@
 import { MusicGenerator } from './Generator';
 import Utils from '../common/Utils';
 
+// const PrettyTable = require('prettytable');
+
 type TransitionMatrix = Map<string, Map<string, number>>;
+
+// function printTransitionMatrix(matrix: TransitionMatrix): void {
+//   // const pt = new PrettyTable();
+//   const headers: Set<string> = new Set();
+//   const rows = [];
+//
+//   for (const [_, v] of matrix.entries()) {
+//     for (const k of v.keys()) {
+//       headers.add(k);
+//     }
+//   }
+//
+//   for (const current of matrix.keys()) {
+//     const row = [current];
+//     for (const header of headers) {
+//       row.push((matrix.get(current).get(header) ?? 0).toString());
+//     }
+//     rows.push(row);
+//   }
+//
+//   for (const row of rows) {
+//     const sum = row.slice(1).map(Number).reduce((a, b) => a + b, 0);
+//     for (let col = 1; col < row.length; col++) {
+//       row[col] = (+row[col] / sum).toString();
+//     }
+//   }
+//
+//   pt.create(['current', ...headers], rows);
+//   pt.print();
+// }
 
 function getRandomSeqKey(matrix: TransitionMatrix | Map<string, number>): string {
   return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
@@ -51,15 +83,26 @@ function* generateSequence(
   yield* generateSequence(next, transtions, step - 1);
 }
 
-export default class MarkovChainMusicGenerator implements MusicGenerator.Generator {
-  constructor(
+export interface MarkovChainMusicGeneratorOptions {
+  steps: number;
+  order: number;
+}
+export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
+  private constructor(
         private readonly steps: number,
         private readonly order: number,
   ) {}
 
-  public generate(input: MusicGenerator.Sequence): MusicGenerator.Sequence {
+  public static async createAndInit(options: MarkovChainMusicGeneratorOptions): Promise<MarkovChainMusicGenerator> {
+    const { steps, order } = options;
+    return new MarkovChainMusicGenerator(+steps, +order);
+  }
+
+  public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
     const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
+    console.log('Transitions:', transitions);
+    // printTransitionMatrix(transitions);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),

@@ -9,7 +9,6 @@ import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
 import { MidiParser } from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
-import MarkovChainMusicGenerator from '../generator/MarkovChainMusicGenerator';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -22,12 +21,12 @@ export class MidiApplication implements CLIApplication {
   protected midiFile: Midi.MidiFile;
 
   private source: MusicGenerator.Sequence;
- 
+
   protected currentSequence: MusicGenerator.Sequence;
 
   private sequences: Map<string, MusicGenerator.Sequence> = new Map();
 
-  private running: boolean = true;
+  private running = true;
 
   protected constructor(
        protected readonly parser: Midi.Parser,
@@ -43,16 +42,60 @@ export class MidiApplication implements CLIApplication {
       name: 'options',
       message: 'Please provide the following information',
       choices: [
-        { name: 'source', message: 'Source'},
-        { name: 'out', message: 'Out'},
-        { name: 'outputs', message: 'No. of outputs'},
-        { name: 'name', message: 'Name of output file'},
-      ]
+        { name: 'source', message: 'Source' },
+        { name: 'out', message: 'Out' },
+        { name: 'outputs', message: 'No. of outputs' },
+        { name: 'name', message: 'Name of output file' },
+      ],
+    });
+
+    const { type } = await prompt<{ type: string }>({
+      type: 'select',
+      name: 'type',
+      message: 'Choose generator type',
+      choices: [
+        { name: 'Markov Chain', value: '0' },
+        { name: 'Magenta MusicRNN', value: '1' },
+      ],
+      result() {
+        return (this as any).focused.value;
+      },
+    });
+
+    const generatorType: MusicGenerator.GeneratorType = [
+      MusicGenerator.GeneratorType.MARKOV_CHAIN,
+      MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN,
+    ][Number(type)];
+
+    let genChoices;
+
+    switch (generatorType) {
+      case MusicGenerator.GeneratorType.MARKOV_CHAIN:
+        genChoices = [
+          { name: 'order', message: 'The order of the Markov chain' },
+          { name: 'steps', message: 'Number of steps to be generated' },
+        ];
+        break;
+      case MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN:
+        genChoices = [
+          { name: 'steps', message: 'Number of steps to be generated' },
+          { name: 'temperature', message: 'The temparature of the MusicRNN' },
+          { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
+        ];
+        break;
+    }
+
+    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{options: MusicGenerator.GeneratorOptions}>({
+      type: 'form',
+      name: 'options',
+      message: 'Provide generator options',
+      choices: genChoices,
     });
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    const generator: MusicGenerator.Generator = new MarkovChainMusicGenerator(100, 3);
+    const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
+    const generator: MusicGenerator.Generator = await generatorFactory.createGenerator(generatorType, genOptions.options);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new MidiApplication(parser, builder, generator, oscClient, options.options);
   }
@@ -84,9 +127,9 @@ export class MidiApplication implements CLIApplication {
     const { format, division } = this.midiFile;
     const { out, name, outputs } = this.options;
 
-    [...Array(Number(outputs)).keys()].forEach((i) => {
-      const generatedSequence: MusicGenerator.Sequence = this.generator.generate(this.source);
-      this.sequences.set(`${out}/${name}_${i}.midi`, generatedSequence);
+    for (let i = 0; i < outputs; i++) {
+      const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
+      this.sequences.set(`${out}/${name}_${i}.midi`, Utils.quantizeSequence(generatedSequence));
       const outMidi: Midi.MidiFile = {
         format,
         division,
@@ -95,7 +138,7 @@ export class MidiApplication implements CLIApplication {
       };
       const outBuffer: Buffer = this.builder.build(outMidi);
       writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
-    });
+    }
 
     await Utils.sleep(2000); /* Cosmetic stuff */
     spinner.succeed(`Generated ${outputs} sequences.`);
@@ -122,7 +165,7 @@ export class MidiApplication implements CLIApplication {
       name: 'sendOsc',
       message: 'Send sequence via OSC?',
     }));
-    
+
     while (this.running) {
       const { seq } = await prompt<{ seq: string }>({
         type: 'select',
