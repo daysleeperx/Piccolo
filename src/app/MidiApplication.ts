@@ -80,7 +80,7 @@ export class MidiApplication implements CLIApplication {
         genChoices = [
           { name: 'steps', message: 'Number of steps to be generated' },
           { name: 'temperature', message: 'The temparature of the MusicRNN' },
-          { name: 'chordProgression', message: 'Chord progression the sequence should be based on' },
+          { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
         ];
         break;
     }
@@ -126,7 +126,6 @@ export class MidiApplication implements CLIApplication {
 
     const { format, division } = this.midiFile;
     const { out, name, outputs } = this.options;
-    console.log('OUTPUTS', outputs);
 
     for (let i = 0; i < outputs; i++) {
       const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);

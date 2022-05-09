@@ -20,7 +20,7 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
     const { steps, temperature, chordProgression } = options;
     const musicRnn = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv');
     await musicRnn.initialize();
-    return new MagentaMusicRNNGenerator(musicRnn, steps, temperature, chordProgression.split(','));
+    return new MagentaMusicRNNGenerator(musicRnn, +steps, +temperature, chordProgression.split(','));
   }
 
   public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
