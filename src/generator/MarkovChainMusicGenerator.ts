@@ -1,42 +1,22 @@
 import { MusicGenerator } from './Generator';
 import Utils from '../common/Utils';
 
-// const PrettyTable = require('prettytable');
-
 type TransitionMatrix = Map<string, Map<string, number>>;
 
-// function printTransitionMatrix(matrix: TransitionMatrix): void {
-//   // const pt = new PrettyTable();
-//   const headers: Set<string> = new Set();
-//   const rows = [];
-//
-//   for (const [_, v] of matrix.entries()) {
-//     for (const k of v.keys()) {
-//       headers.add(k);
-//     }
-//   }
-//
-//   for (const current of matrix.keys()) {
-//     const row = [current];
-//     for (const header of headers) {
-//       row.push((matrix.get(current).get(header) ?? 0).toString());
-//     }
-//     rows.push(row);
-//   }
-//
-//   for (const row of rows) {
-//     const sum = row.slice(1).map(Number).reduce((a, b) => a + b, 0);
-//     for (let col = 1; col < row.length; col++) {
-//       row[col] = (+row[col] / sum).toString();
-//     }
-//   }
-//
-//   pt.create(['current', ...headers], rows);
-//   pt.print();
-// }
-
-function getRandomSeqKey(matrix: TransitionMatrix | Map<string, number>): string {
+function getRandomSeqKey(matrix: TransitionMatrix): string {
   return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
+}
+
+function getWeightedRandomKey(probs: Map<string, number>): string {
+  const probsSum: number = [...probs.values()].reduce((a, b) => a + b, 0);
+  const rand: number = Math.floor(Math.random() * probsSum);
+
+  let sum: number = 0;
+  for (const [k, v] of probs.entries()) {
+    sum += v;
+    if (rand <= sum) return k;
+  }
+  return undefined;
 }
 
 function transitionMatrix(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
@@ -73,7 +53,7 @@ function* generateSequence(
 
   const seqKey: string = current.map<string>(([pitch, duration]) => `${pitch}:${duration}`).join('->');
   if (transtions.has(seqKey)) {
-    const nextNote = Utils.keyToNote(getRandomSeqKey(transtions.get(seqKey)));
+    const nextNote = Utils.keyToNote(getWeightedRandomKey(transtions.get(seqKey)));
     next = [...current.slice(1), nextNote];
   } else {
     next = getRandomSeqKey(transtions).split('->').map(Utils.keyToNote);
@@ -102,7 +82,6 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
     const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
     console.log('Transitions:', transitions);
-    // printTransitionMatrix(transitions);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),

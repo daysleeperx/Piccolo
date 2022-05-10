@@ -40,6 +40,13 @@ export namespace MusicGenerator {
     }
 
     export class GeneratorFactory {
+      /**
+       * Factory method for creating Algorithmic Music Composition implementations.
+       * 
+       * @param {GeneratorType} type 
+       * @param {GeneratorOptions} options 
+       * @returns {Generator}
+       */
       public async createGenerator(type: GeneratorType, options: GeneratorOptions) {
         switch (type) {
           case GeneratorType.MARKOV_CHAIN:
