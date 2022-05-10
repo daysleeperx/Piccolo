@@ -10,7 +10,6 @@ function getRandomSeqKey(matrix: TransitionMatrix): string {
 function getWeightedRandomKey(probs: Map<string, number>): string {
   const probsSum: number = [...probs.values()].reduce((a, b) => a + b, 0);
   const rand: number = Math.floor(Math.random() * probsSum);
-  console.log('I AM HERE');
 
   let sum: number = 0;
   for (const [k, v] of probs.entries()) {
