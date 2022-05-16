@@ -3,6 +3,8 @@
 
 use_bpm 80
 
+set :sequence, []
+
 live_loop :receive_sequence do
   use_real_time
   seq = sync "/osc*/gen/sequence"
@@ -14,43 +16,47 @@ live_loop :metronome do
   sleep 1
 end
 
-live_loop :piano_part, sync: :metronome do
-  F = (ring :C5, :F5, :A5)
-  Gm7 = (ring :As4, :F5, :G5)
-  Bbmaj7 = (ring :D5, :A5, :Bb5)
-  
-  with_fx :reverb, room: 1 do
+with_fx :reverb, room: 1 do
+  live_loop :piano_part, sync: :metronome do
+    F = (ring :C5, :F5, :A5)
+    Gm7 = (ring :As4, :F5, :G5)
+    Bbmaj7 = (ring :D5, :A5, :Bb5)
+    
     use_synth :piano
+    use_synth_defaults sustain: 0.8, release: 0.2, hard: 0.1
+
     18.times do
-      play F.tick, release: 1, hard: 0.1
-      sleep 1
+      play F.tick
+      sleep 1 
     end
     6.times do
-      play Gm7.tick, release: 1, hard: 0.1
+      play Gm7.tick
       sleep 1
     end
     24.times do
-      play F.tick, release: 1, hard: 0.1
+      play F.tick
       sleep 1
     end
     6.times do
-      play Bbmaj7.tick, release: 1, hard: 0.1
+      play Bbmaj7.tick
       sleep 1
     end
   end
-end
-
-live_loop :play_gen_sequence, sync: :metronome do
-  use_synth :square
-  notes = get[:sequence] || []
-  puts notes
   
-  with_fx :reverb, room: 1 do
+  live_loop :play_gen_sequence, sync: :metronome do
+    notes = get[:sequence] || []
+    puts notes
+    
     if notes.empty?
       sleep 1
     else
       notes.each do |note, step|
-        play note, attack: 0.3, sustain: step, amp: 0.2, cutoff: 90
+        use_synth :blade
+        use_synth_defaults amp: 0.4, attack: step * 0.4, decay: step * 0.1,
+          sustain: step * 0.3, release: step * 0.2, vibrato_rate: 7
+        play note
+        use_synth :square
+        play note, amp: 0.03
         sleep step
       end
     end

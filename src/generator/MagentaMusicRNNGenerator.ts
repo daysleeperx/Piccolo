@@ -30,7 +30,7 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
         acc.push({
           pitch,
           startTime: acc[acc.length - 1]?.endTime ?? 0,
-          endTime: (acc[acc.length - 1]?.endTime ?? 0) + (duration / quantization.stepsPerQuater * 0.5),
+          endTime: (acc[acc.length - 1]?.endTime ?? 0) + (duration / quantization.stepsPerQuarter * 0.5),
         });
         return acc;
       }, []),
@@ -42,7 +42,7 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
     const generatedRnnSequence: INoteSequence = await this.musicRnn.continueSequence(quantizedSeq2, this.steps, this.temperature, this.chordProgression);
     return {
       tempo,
-      quantization: { stepsPerQuater: 4 },
+      quantization: { stepsPerQuarter: 4 },
       notes: generatedRnnSequence.notes.map((note) => [note.pitch, note.quantizedEndStep - note.quantizedStartStep]),
     };
   }
