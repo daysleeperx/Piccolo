@@ -22,7 +22,7 @@ export default class Utils {
         .map((e: Midi.Event, idx: number, xs: Midi.Event[]) => idx % 2 === 0 && Utils.eventsToNote(e, xs[idx + 1]))
         .filter((x: MusicGenerator.Note) => x),
       quantization: {
-        stepsPerQuater: (division as Midi.TicksPerBeat).ticksPerBeat,
+        stepsPerQuarter: (division as Midi.TicksPerBeat).ticksPerBeat,
       },
       tempo: {
         bpm: tempo.value,
@@ -51,7 +51,7 @@ export default class Utils {
 
   public static quantizeSequence(sequence: MusicGenerator.Sequence): MusicGenerator.Sequence {
     const { tempo, quantization, notes } : MusicGenerator.Sequence = sequence;
-    const grid: number[] = [...Array(7).keys()].map((n) => (quantization.stepsPerQuater / 4) * (2 ** n));
+    const grid: number[] = [...Array(7).keys()].map((n) => (quantization.stepsPerQuarter / 4) * (2 ** n));
 
     return {
       tempo,

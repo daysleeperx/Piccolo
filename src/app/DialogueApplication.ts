@@ -96,7 +96,7 @@ export class DialogueApplication implements CLIApplication {
       const sequence : MusicGenerator.Sequence = {
         notes: JSON.parse(msg),
         tempo: { bpm: 120 },
-        quantization: { stepsPerQuater: 1 },
+        quantization: { stepsPerQuarter: 1 },
       };
 
       const genSequence : MusicGenerator.Sequence = await this.generator.generate(sequence);

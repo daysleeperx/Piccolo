@@ -10,7 +10,7 @@ export namespace MusicGenerator {
     export type Note = [pitch: Pitch, quantizedSteps: Steps];
 
     export interface Quantization {
-        stepsPerQuater: Steps;
+        stepsPerQuarter: Steps;
     }
 
     export interface Tempo {
@@ -42,9 +42,9 @@ export namespace MusicGenerator {
     export class GeneratorFactory {
       /**
        * Factory method for creating Algorithmic Music Composition implementations.
-       * 
-       * @param {GeneratorType} type 
-       * @param {GeneratorOptions} options 
+       *
+       * @param {GeneratorType} type
+       * @param {GeneratorOptions} options
        * @returns {Generator}
        */
       public async createGenerator(type: GeneratorType, options: GeneratorOptions) {

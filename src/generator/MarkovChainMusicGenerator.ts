@@ -11,7 +11,7 @@ function getWeightedRandomKey(probs: Map<string, number>): string {
   const probsSum: number = [...probs.values()].reduce((a, b) => a + b, 0);
   const rand: number = Math.floor(Math.random() * probsSum);
 
-  let sum: number = 0;
+  let sum = 0;
   for (const [k, v] of probs.entries()) {
     sum += v;
     if (rand <= sum) return k;
@@ -81,7 +81,6 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
   public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
     const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
-    console.log('Transitions:', transitions);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),

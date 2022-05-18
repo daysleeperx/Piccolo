@@ -84,7 +84,7 @@ export class SequentialApplication extends MidiApplication {
   }
 
   override async sendOSCMessage(): Promise<void> {
-    const { notes, quantization: { stepsPerQuater } } = this.currentSequence;
+    const { notes, quantization: { stepsPerQuarter } } = this.currentSequence;
 
     const bar = new SingleBar({}, Presets.shades_classic);
     bar.start(notes.length, 0);
@@ -93,7 +93,7 @@ export class SequentialApplication extends MidiApplication {
     for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
       this.oscClient.send(['melody/notes', pitch]);
       /* eslint-disable-next-line no-await-in-loop */
-      await Utils.sleep((quantizedSteps / stepsPerQuater) * 1000);
+      await Utils.sleep((quantizedSteps / stepsPerQuarter) * 1000);
       bar.update(idx + 1);
     }
 
