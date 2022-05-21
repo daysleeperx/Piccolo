@@ -69,8 +69,7 @@ async function main() {
     console.log(options);
   }
 
-  const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
-  const cliApp: CLIApplication = await cliAppFactory.createApplication(modes[Number(mode)]);
+  const cliApp: CLIApplication = await CLIApplicationFactory.createApplication(modes[Number(mode)]);
   await cliApp.run();
 }
 

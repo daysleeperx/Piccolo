@@ -107,7 +107,7 @@ export class MidiApplication implements CLIApplication {
 
     this.midiFile = this.parser.parse(buffer);
     const { format, tracks, division } : Midi.MidiFile = this.midiFile;
-    
+
     let track = 0;
     if (format !== Midi.FileFormat.SINGLE_TRACK) {
       const { response } = await prompt<{ response: string }>({
@@ -122,21 +122,21 @@ export class MidiApplication implements CLIApplication {
   }
 
   private async generateSequences(): Promise<void> {
-     const { format, division } = this.midiFile;
-     const { out, name, outputs } = this.options;
+    const { format, division } = this.midiFile;
+    const { out, name, outputs } = this.options;
 
-     for (let i = 0; i < outputs; i++) {
-       const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
-       this.sequences.set(`${out}/${name}_${i}.midi`, Utils.quantizeSequence(generatedSequence));
-       const outMidi: Midi.MidiFile = {
-         format,
-         division,
-         ntrks: 1,
-         tracks: [Utils.sequenceToMidiTrack(generatedSequence)],
-       };
-       const outBuffer: Buffer = this.builder.build(outMidi);
-       writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
-     }
+    for (let i = 0; i < outputs; i++) {
+      const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
+      this.sequences.set(`${out}/${name}_${i}.midi`, Utils.quantizeSequence(generatedSequence));
+      const outMidi: Midi.MidiFile = {
+        format,
+        division,
+        ntrks: 1,
+        tracks: [Utils.sequenceToMidiTrack(generatedSequence)],
+      };
+      const outBuffer: Buffer = this.builder.build(outMidi);
+      writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
+    }
 
     await Utils.sleep(2000); /* Cosmetic stuff */
   }

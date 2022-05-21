@@ -1,11 +1,12 @@
-import { DialogueApplication, DialogueApplicationOptions } from './DialogueApplication';
+import { UnreachableCode } from '../common/UnreachableCode';
+import DialogueApplication from './DialogueApplication';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
 import { SequentialApplication } from './SequentialApplication';
 
 /**
  * Represents a Command Line interface.
  */
-export type CLIOptions = MidiSourceAppOptions | DialogueApplicationOptions;
+export type CLIOptions = MidiSourceAppOptions;
 
 export enum ApplicationMode {
   MIDI,
@@ -27,7 +28,7 @@ export class CLIApplicationFactory {
    * @param {ApplicationMode} mode
    * @returns {CLIApplication}
    */
-  public async createApplication(mode: ApplicationMode): Promise<CLIApplication> {
+  public static async createApplication(mode: ApplicationMode): Promise<CLIApplication> {
     switch (mode) {
       case ApplicationMode.MIDI:
         return MidiApplication.createAndInit();
@@ -35,6 +36,8 @@ export class CLIApplicationFactory {
         return DialogueApplication.createAndInit();
       case ApplicationMode.SEQUENTIAL:
         return SequentialApplication.createAndInit();
+      default:
+        return UnreachableCode.never(mode);
     }
   }
 }
