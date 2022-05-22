@@ -1,3 +1,4 @@
+import { UnreachableCode } from '../common/UnreachableCode';
 import { MagentaMusicRNNGenerator, MagentaMusicRNNGeneratorOptions } from './MagentaMusicRNNGenerator';
 import { MarkovChainMusicGenerator, MarkovChainMusicGeneratorOptions } from './MarkovChainMusicGenerator';
 
@@ -47,12 +48,14 @@ export namespace MusicGenerator {
        * @param {GeneratorOptions} options
        * @returns {Generator}
        */
-      public async createGenerator(type: GeneratorType, options: GeneratorOptions) {
+      public static async createGenerator(type: GeneratorType, options: GeneratorOptions) {
         switch (type) {
           case GeneratorType.MARKOV_CHAIN:
             return MarkovChainMusicGenerator.createAndInit(options as MarkovChainMusicGeneratorOptions);
           case GeneratorType.MAGNETA_MUSIC_RNN:
             return MagentaMusicRNNGenerator.createAndInit(options as MagentaMusicRNNGeneratorOptions);
+          default:
+            return UnreachableCode.never(type);
         }
       }
     }

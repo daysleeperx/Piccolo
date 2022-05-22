@@ -11,8 +11,7 @@ describe('Markov Chains Music Generator Tests', () => {
 
     test('twinkle twinkle - 1st order markov chain', async () => {
         const buffer = readFileSync(path.join(__dirname, './data/twinkle_twinkle.midi'));
-        const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-        generator = await generatorFactory.createGenerator(MusicGenerator.GeneratorType.MARKOV_CHAIN, { steps: 10, order: 1});
+        generator = await MusicGenerator.GeneratorFactory.createGenerator(MusicGenerator.GeneratorType.MARKOV_CHAIN, { steps: 10, order: 1});
 
         const { division, tracks } = parser.parse(buffer);
 
@@ -25,8 +24,7 @@ describe('Markov Chains Music Generator Tests', () => {
 
     test('twinkle twinkle - magenta rnn', async () => {
         const buffer = readFileSync(path.join(__dirname, './data/twinkle_twinkle.midi'));
-        const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-        generator = await generatorFactory.createGenerator(MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN, { steps: 100, temperature: 1, chordProgression: 'E,A,C'});
+        generator = await MusicGenerator.GeneratorFactory.createGenerator(MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN, { steps: 100, temperature: 1, chordProgression: 'E,A,C'});
 
         const { tracks, division } = parser.parse(buffer);
         const sequence: MusicGenerator.Sequence = Utils.extractSequenceFromTrack(tracks[1], { value: 120}, division);

@@ -77,8 +77,7 @@ export class SequentialApplication extends MidiApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-    const generator: MusicGenerator.Generator = await generatorFactory.createGenerator(generatorType, genOptions.options);
+    const generator: MusicGenerator.Generator = await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new SequentialApplication(parser, builder, generator, oscClient, options.options);
   }

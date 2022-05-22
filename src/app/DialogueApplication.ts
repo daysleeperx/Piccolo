@@ -61,8 +61,7 @@ export default class DialogueApplication implements CLIApplication {
       choices: genChoices,
     });
 
-    const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-    const generator: MusicGenerator.Generator = await generatorFactory.createGenerator(
+    const generator: MusicGenerator.Generator = await MusicGenerator.GeneratorFactory.createGenerator(
       generatorType,
       genOptions.options,
     );
@@ -78,7 +77,7 @@ export default class DialogueApplication implements CLIApplication {
   private setupOsc(): void {
     this.oscServer.on('/gen/sequence', async (message: [string, ...OSC.ArgumentType[]]) => {
       console.log(chalk.white(`OSC message received: ${message}`));
-      const [_addr, msg] = message;
+      const [_, msg] = message;
 
       const sequence : MusicGenerator.Sequence = {
         notes: JSON.parse(msg as string),
