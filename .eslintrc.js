@@ -30,8 +30,9 @@ module.exports = {
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": ["error"],
     "no-console": "off",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    "operator-linebreak": ["error", "after"]
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" , "destructuredArrayIgnorePattern": "^_"}],
+    "operator-linebreak": ["error", "after"],
+    "@typescript-eslint/no-namespace": "off"
   },
   settings: {
     'import/resolver': {

@@ -16,9 +16,13 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
         private readonly chordProgression: string[],
   ) {}
 
-  public static async createAndInit(options: MagentaMusicRNNGeneratorOptions): Promise<MagentaMusicRNNGenerator> {
+  public static async createAndInit(
+    options: MagentaMusicRNNGeneratorOptions,
+  ): Promise<MagentaMusicRNNGenerator> {
     const { steps, temperature, chordProgression } = options;
-    const musicRnn = new MusicRNN('https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv');
+    const musicRnn = new MusicRNN(
+      'https://storage.googleapis.com/magentadata/js/checkpoints/music_rnn/chord_pitches_improv',
+    );
     await musicRnn.initialize();
     return new MagentaMusicRNNGenerator(musicRnn, +steps, +temperature, chordProgression.split(','));
   }
@@ -30,7 +34,8 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
         acc.push({
           pitch,
           startTime: acc[acc.length - 1]?.endTime ?? 0,
-          endTime: (acc[acc.length - 1]?.endTime ?? 0) + (duration / quantization.stepsPerQuarter * 0.5),
+          endTime: (acc[acc.length - 1]?.endTime ?? 0) +
+            ((duration / quantization.stepsPerQuarter) * 0.5),
         });
         return acc;
       }, []),
@@ -39,11 +44,19 @@ export class MagentaMusicRNNGenerator implements MusicGenerator.Generator {
 
     const quantizedSeq2 = sequences.quantizeNoteSequence(quantizedSeq, 4);
 
-    const generatedRnnSequence: INoteSequence = await this.musicRnn.continueSequence(quantizedSeq2, this.steps, this.temperature, this.chordProgression);
+    const generatedRnnSequence: INoteSequence = await this.musicRnn.continueSequence(
+      quantizedSeq2,
+      this.steps,
+      this.temperature,
+      this.chordProgression,
+    );
+
     return {
       tempo,
       quantization: { stepsPerQuarter: 4 },
-      notes: generatedRnnSequence.notes.map((note) => [note.pitch, note.quantizedEndStep - note.quantizedStartStep]),
+      notes: generatedRnnSequence.notes.map(
+        (note) => [note.pitch, note.quantizedEndStep - note.quantizedStartStep],
+      ),
     };
   }
 }

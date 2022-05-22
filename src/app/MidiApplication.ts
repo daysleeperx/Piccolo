@@ -9,7 +9,7 @@ import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
 import { MidiParser } from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
-import { UnreachableCode } from '../common/UnreachableCode';
+import UnreachableCode from '../common/UnreachableCode';
 
 export interface MidiSourceAppOptions {
     source: string;

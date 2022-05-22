@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { prompt } from 'enquirer';
 import * as OSC from 'node-osc';
-import { UnreachableCode } from '../common/UnreachableCode';
+import UnreachableCode from '../common/UnreachableCode';
 import { MusicGenerator } from '../generator/Generator';
 import { CLIApplication } from './CLIApplication';
 
@@ -61,10 +61,8 @@ export default class DialogueApplication implements CLIApplication {
       choices: genChoices,
     });
 
-    const generator: MusicGenerator.Generator = await MusicGenerator.GeneratorFactory.createGenerator(
-      generatorType,
-      genOptions.options,
-    );
+    const generator: MusicGenerator.Generator =
+      await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     const oscServer: OSC.Server = new OSC.Server(
       9912,

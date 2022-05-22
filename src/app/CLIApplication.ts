@@ -1,7 +1,7 @@
-import { UnreachableCode } from '../common/UnreachableCode';
+import UnreachableCode from '../common/UnreachableCode';
 import DialogueApplication from './DialogueApplication';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
-import { SequentialApplication } from './SequentialApplication';
+import SequentialApplication from './SequentialApplication';
 
 /**
  * Represents a Command Line interface.

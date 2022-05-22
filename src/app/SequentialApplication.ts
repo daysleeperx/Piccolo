@@ -7,8 +7,9 @@ import { Midi } from '../parser/Parser';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
 import MidiBuilder from '../parser/MidiBuilder';
 import { MidiParser } from '../parser/MidiParser';
+import UnreachableCode from '../common/UnreachableCode';
 
-export class SequentialApplication extends MidiApplication {
+export default class SequentialApplication extends MidiApplication {
   private constructor(
     parser: Midi.Parser,
     builder: Midi.Builder,
@@ -41,6 +42,7 @@ export class SequentialApplication extends MidiApplication {
         { name: 'Magenta MusicRNN', value: '1' },
       ],
       result() {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         return (this as any).focused.value;
       },
     });
@@ -66,9 +68,13 @@ export class SequentialApplication extends MidiApplication {
           { name: 'chordProgression', message: 'Chord progression the sequence should be based on' },
         ];
         break;
+      default:
+        UnreachableCode.never(generatorType);
     }
 
-    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{options: MusicGenerator.GeneratorOptions}>({
+    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{
+      options: MusicGenerator.GeneratorOptions
+    }>({
       type: 'form',
       name: 'options',
       message: 'Provide generator options',
@@ -77,7 +83,8 @@ export class SequentialApplication extends MidiApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    const generator: MusicGenerator.Generator = await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
+    const generator: MusicGenerator.Generator =
+      await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new SequentialApplication(parser, builder, generator, oscClient, options.options);
   }
@@ -88,13 +95,15 @@ export class SequentialApplication extends MidiApplication {
     const bar = new SingleBar({}, Presets.shades_classic);
     bar.start(notes.length, 0);
 
-    /* eslint-disable-next-line no-restricted-syntax */
-    for (const [idx, [pitch, quantizedSteps]] of notes.entries()) {
-      this.oscClient.send(['melody/notes', pitch]);
-      /* eslint-disable-next-line no-await-in-loop */
-      await Utils.sleep((quantizedSteps / stepsPerQuarter) * 1000);
-      bar.update(idx + 1);
-    }
+    await notes.reduce(
+      async (suspendTime, [pitch, quantizedSteps], idx) => {
+        await suspendTime;
+        bar.update(idx + 1);
+        this.oscClient.send(['melody/notes', pitch]);
+        return Utils.sleep((quantizedSteps / stepsPerQuarter) * 1000);
+      },
+      Promise.resolve(),
+    );
 
     bar.stop();
   }
