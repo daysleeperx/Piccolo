@@ -32,7 +32,8 @@ module.exports = {
     "no-console": "off",
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" , "destructuredArrayIgnorePattern": "^_"}],
     "operator-linebreak": ["error", "after"],
-    "@typescript-eslint/no-namespace": "off"
+    "@typescript-eslint/no-namespace": "off",
+    "no-return-assign": "off",
   },
   settings: {
     'import/resolver': {
