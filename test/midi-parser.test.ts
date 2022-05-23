@@ -1,4 +1,4 @@
-import { MidiParser } from "../src/parser/MidiParser";
+import MidiParser from "../src/parser/MidiParser";
 import { readFileSync } from 'fs';
 import path from 'path';
 import { Midi } from "../src/parser/Parser";

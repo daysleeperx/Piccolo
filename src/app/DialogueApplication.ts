@@ -1,17 +1,11 @@
 import chalk from 'chalk';
 import { prompt } from 'enquirer';
 import * as OSC from 'node-osc';
+import UnreachableCode from '../common/UnreachableCode';
 import { MusicGenerator } from '../generator/Generator';
 import { CLIApplication } from './CLIApplication';
 
-export interface DialogueApplicationOptions {
-    server_port: number;
-    server_hostname: string;
-    client_port: number;
-    client_hostname: string;
-}
-
-export class DialogueApplication implements CLIApplication {
+export default class DialogueApplication implements CLIApplication {
   private constructor(
         private readonly generator: MusicGenerator.Generator,
         private readonly oscServer: OSC.Server,
@@ -19,18 +13,6 @@ export class DialogueApplication implements CLIApplication {
   ) {}
 
   public static async createAndInit(): Promise<DialogueApplication> {
-    const options: { options: DialogueApplicationOptions } = await prompt<{ options: DialogueApplicationOptions }>({
-      type: 'form',
-      name: 'options',
-      message: 'Please provide the following information',
-      choices: [
-        { name: 'server_port', message: 'Server Port' },
-        { name: 'server_hostname', message: 'Server Hostname' },
-        { name: 'client_port', message: 'Client port' },
-        { name: 'client_hostname', message: 'Client hostname' },
-      ],
-    });
-
     const { type } = await prompt<{ type: string }>({
       type: 'select',
       name: 'type',
@@ -40,6 +22,7 @@ export class DialogueApplication implements CLIApplication {
         { name: 'Magenta MusicRNN', value: '1' },
       ],
       result() {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         return (this as any).focused.value;
       },
     });
@@ -65,36 +48,37 @@ export class DialogueApplication implements CLIApplication {
           { name: 'chordProgression', message: 'Chord progression the sequence should be based on' },
         ];
         break;
+      default:
+        UnreachableCode.never(generatorType);
     }
 
-    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{options: MusicGenerator.GeneratorOptions}>({
+    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{
+      options: MusicGenerator.GeneratorOptions
+    }>({
       type: 'form',
       name: 'options',
       message: 'Provide generator options',
       choices: genChoices,
     });
 
-    const {
-      server_port, server_hostname, client_port, client_hostname,
-    } = options.options;
-    const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-    const generator: MusicGenerator.Generator = await generatorFactory.createGenerator(generatorType, genOptions.options);
-    const oscClient: OSC.Client = new OSC.Client(client_hostname, client_port);
+    const generator: MusicGenerator.Generator =
+      await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
+    const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     const oscServer: OSC.Server = new OSC.Server(
-      server_port,
-      server_hostname,
-      () => console.log(chalk.whiteBright(`OSC Server is listening at port ${server_port}. Press CTRL + C to quit.`)),
+      9912,
+      'localhost',
+      () => console.log(chalk.whiteBright('OSC Server is listening at port 9912. Press CTRL + C to quit.')),
     );
     return new DialogueApplication(generator, oscServer, oscClient);
   }
 
   private setupOsc(): void {
-    this.oscServer.on('/gen/sequence', async (message: any) => {
+    this.oscServer.on('/gen/sequence', async (message: [string, ...OSC.ArgumentType[]]) => {
       console.log(chalk.white(`OSC message received: ${message}`));
       const [_, msg] = message;
 
       const sequence : MusicGenerator.Sequence = {
-        notes: JSON.parse(msg),
+        notes: JSON.parse(msg as string),
         tempo: { bpm: 120 },
         quantization: { stepsPerQuarter: 1 },
       };

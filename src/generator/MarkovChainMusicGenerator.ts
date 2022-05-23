@@ -10,13 +10,9 @@ function getRandomSeqKey(matrix: TransitionMatrix): string {
 function getWeightedRandomKey(probs: Map<string, number>): string {
   const probsSum: number = [...probs.values()].reduce((a, b) => a + b, 0);
   const rand: number = Math.floor(Math.random() * probsSum);
-
   let sum = 0;
-  for (const [k, v] of probs.entries()) {
-    sum += v;
-    if (rand <= sum) return k;
-  }
-  return undefined;
+
+  return [...probs.keys()].find((k) => rand <= (sum += probs.get(k)));
 }
 
 function transitionMatrix(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
@@ -73,7 +69,9 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
         private readonly order: number,
   ) {}
 
-  public static async createAndInit(options: MarkovChainMusicGeneratorOptions): Promise<MarkovChainMusicGenerator> {
+  public static async createAndInit(
+    options: MarkovChainMusicGeneratorOptions,
+  ): Promise<MarkovChainMusicGenerator> {
     const { steps, order } = options;
     return new MarkovChainMusicGenerator(+steps, +order);
   }

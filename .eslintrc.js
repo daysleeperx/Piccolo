@@ -27,10 +27,21 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"],
+    "no-console": "off",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" , "destructuredArrayIgnorePattern": "^_"}],
+    "operator-linebreak": ["error", "after"],
+    "@typescript-eslint/no-namespace": "off",
+    "no-return-assign": "off",
+    "class-methods-use-this": ["error", { "exceptMethods": ["build", "generate"] }],
+    "@typescript-eslint/no-empty-interface": "off",
   },
   settings: {
     'import/resolver': {
-      typescript: {},
+      typescript: {
+        alwaysTryTypes: true
+      },
     },
   },
 };

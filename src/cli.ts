@@ -61,6 +61,7 @@ async function main() {
         { name: 'SEQUENTIAL', value: '2' },
       ],
       result() {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         return (this as any).focused.value;
       },
     }));
@@ -69,8 +70,7 @@ async function main() {
     console.log(options);
   }
 
-  const cliAppFactory: CLIApplicationFactory = new CLIApplicationFactory();
-  const cliApp: CLIApplication = await cliAppFactory.createApplication(modes[Number(mode)]);
+  const cliApp: CLIApplication = await CLIApplicationFactory.createApplication(modes[Number(mode)]);
   await cliApp.run();
 }
 

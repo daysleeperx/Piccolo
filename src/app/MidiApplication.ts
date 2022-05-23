@@ -7,8 +7,9 @@ import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
-import { MidiParser } from '../parser/MidiParser';
+import MidiParser from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
+import UnreachableCode from '../common/UnreachableCode';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -37,7 +38,9 @@ export class MidiApplication implements CLIApplication {
   ) {}
 
   public static async createAndInit(): Promise<MidiApplication> {
-    const options: { options: MidiSourceAppOptions } = await prompt<{ options: MidiSourceAppOptions }>({
+    const options: { options: MidiSourceAppOptions } = await prompt<{
+      options: MidiSourceAppOptions
+    }>({
       type: 'form',
       name: 'options',
       message: 'Please provide the following information',
@@ -58,6 +61,7 @@ export class MidiApplication implements CLIApplication {
         { name: 'Magenta MusicRNN', value: '1' },
       ],
       result() {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         return (this as any).focused.value;
       },
     });
@@ -83,9 +87,13 @@ export class MidiApplication implements CLIApplication {
           { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
         ];
         break;
+      default:
+        UnreachableCode.never(generatorType);
     }
 
-    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{options: MusicGenerator.GeneratorOptions}>({
+    const genOptions: { options: MusicGenerator.GeneratorOptions } = await prompt<{
+      options: MusicGenerator.GeneratorOptions
+    }>({
       type: 'form',
       name: 'options',
       message: 'Provide generator options',
@@ -94,8 +102,8 @@ export class MidiApplication implements CLIApplication {
 
     const parser: Midi.Parser = new MidiParser();
     const builder: Midi.Builder = new MidiBuilder();
-    const generatorFactory: MusicGenerator.GeneratorFactory = new MusicGenerator.GeneratorFactory();
-    const generator: MusicGenerator.Generator = await generatorFactory.createGenerator(generatorType, genOptions.options);
+    const generator: MusicGenerator.Generator =
+      await MusicGenerator.GeneratorFactory.createGenerator(generatorType, genOptions.options);
     const oscClient: OSC.Client = new OSC.Client('localhost', 4560);
     return new MidiApplication(parser, builder, generator, oscClient, options.options);
   }
@@ -107,7 +115,7 @@ export class MidiApplication implements CLIApplication {
 
     this.midiFile = this.parser.parse(buffer);
     const { format, tracks, division } : Midi.MidiFile = this.midiFile;
-    
+
     let track = 0;
     if (format !== Midi.FileFormat.SINGLE_TRACK) {
       const { response } = await prompt<{ response: string }>({
@@ -122,23 +130,27 @@ export class MidiApplication implements CLIApplication {
   }
 
   private async generateSequences(): Promise<void> {
-     const { format, division } = this.midiFile;
-     const { out, name, outputs } = this.options;
+    const { format, division } = this.midiFile;
+    const { out, name, outputs } = this.options;
 
-     for (let i = 0; i < outputs; i++) {
-       const generatedSequence: MusicGenerator.Sequence = await this.generator.generate(this.source);
-       this.sequences.set(`${out}/${name}_${i}.midi`, Utils.quantizeSequence(generatedSequence));
-       const outMidi: Midi.MidiFile = {
-         format,
-         division,
-         ntrks: 1,
-         tracks: [Utils.sequenceToMidiTrack(generatedSequence)],
-       };
-       const outBuffer: Buffer = this.builder.build(outMidi);
-       writeFileSync(path.join(__dirname, `${out}/${name}_${i}.midi`), outBuffer);
-     }
+    const generatedSequences: MusicGenerator.Sequence[] = await Promise.all(
+      [...Array(+outputs).keys()].reduce<Promise<MusicGenerator.Sequence>[]>(
+        (acc, _) => [...acc, this.generator.generate(this.source)],
+        [],
+      ),
+    );
 
-    await Utils.sleep(2000); /* Cosmetic stuff */
+    generatedSequences.forEach((seq, idx) => {
+      this.sequences.set(`${out}/${name}_${idx}.midi`, Utils.quantizeSequence(seq));
+      const outMidi: Midi.MidiFile = {
+        format,
+        division,
+        ntrks: 1,
+        tracks: [Utils.sequenceToMidiTrack(seq)],
+      };
+      const outBuffer: Buffer = this.builder.build(outMidi);
+      writeFileSync(path.join(__dirname, `${out}/${name}_${idx}.midi`), outBuffer);
+    });
   }
 
   protected async sendOSCMessage(): Promise<void> {
@@ -165,6 +177,7 @@ export class MidiApplication implements CLIApplication {
       message: 'Send sequence via OSC?',
     }));
 
+    /* eslint-disable no-await-in-loop */
     while (this.running) {
       const { seq } = await prompt<{ seq: string }>({
         type: 'select',
