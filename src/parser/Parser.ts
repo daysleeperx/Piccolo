@@ -113,12 +113,12 @@ export namespace Midi {
     }
 
     export interface SequencerSpecific {
-        data: any;
+        data: unknown;
     }
 
     export interface SysEx {
         code: 240 | 247; // F0 or F7
-        data: any;
+        data: unknown;
     }
 
     export type Message =

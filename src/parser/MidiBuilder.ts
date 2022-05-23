@@ -1,7 +1,6 @@
+import midiConverter from 'midi-converter';
 import Utils from '../common/Utils';
 import { Midi } from './Parser';
-
-const midiConverter = require('midi-converter');
 
 export default class MidiBuilder implements Midi.Builder {
   build(midi: Midi.MidiFile): Buffer {

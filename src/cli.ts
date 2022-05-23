@@ -61,6 +61,7 @@ async function main() {
         { name: 'SEQUENTIAL', value: '2' },
       ],
       result() {
+        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
         return (this as any).focused.value;
       },
     }));

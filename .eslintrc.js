@@ -34,6 +34,8 @@ module.exports = {
     "operator-linebreak": ["error", "after"],
     "@typescript-eslint/no-namespace": "off",
     "no-return-assign": "off",
+    "class-methods-use-this": ["error", { "exceptMethods": ["build", "generate"] }],
+    "@typescript-eslint/no-empty-interface": "off",
   },
   settings: {
     'import/resolver': {

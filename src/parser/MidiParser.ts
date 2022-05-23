@@ -1,3 +1,4 @@
+/* eslint-disable */ 
 import { Midi } from './Parser';
 
 interface File {
@@ -12,7 +13,7 @@ interface File {
     readVariableLengthQnt(): number;
 }
 
-export class MidiParser implements Midi.Parser {
+export default class MidiParser implements Midi.Parser {
   public parse(input: Buffer): Midi.MidiFile {
     if (!(input instanceof Uint8Array)) {
       throw new Error('Invalid input!');
@@ -22,7 +23,11 @@ export class MidiParser implements Midi.Parser {
 
   private parseUint8(FileAsUint8Array: Buffer): Midi.MidiFile {
     const file: File = {
-      data: new DataView(FileAsUint8Array.buffer, FileAsUint8Array.byteOffset, FileAsUint8Array.byteLength),
+      data: new DataView(
+        FileAsUint8Array.buffer,
+        FileAsUint8Array.byteOffset,
+        FileAsUint8Array.byteLength,
+      ),
       pointer: 0,
       movePointer(_bytes) { // move the pointer negative and positive direction
         this.pointer += _bytes;
@@ -113,12 +118,11 @@ export class MidiParser implements Midi.Parser {
       let laststatusByte;
       while (!endOfTrack) {
         e++; // increase by 1 event counter
-        const deltaTime: number = file.readVariableLengthQnt(); // get DELTA TIME OF MIDI event (Variable Length Value)
+        const deltaTime: number = file.readVariableLengthQnt();
         statusByte = file.readInt(1); // read EVENT TYPE (STATUS BYTE)
         if (statusByte === -1) {
           break;
-        } // EOF
-        else if (statusByte >= 128) {
+        } else if (statusByte >= 128) {
           laststatusByte = statusByte;
         } else { // 'RUNNING STATUS' situation detected
           statusByte = laststatusByte; // apply last loop, Status Byte
@@ -199,12 +203,7 @@ export class MidiParser implements Midi.Parser {
               ];
               console.info('Unimplemented 0xFF meta event! data block readed as Integer');
           }
-        }
-
-        //
-        // IS REGULAR EVENT
-        //
-        else { // MIDI Control Events OR System Exclusive Events
+        } else { // MIDI Control Events OR System Exclusive Events
           statusByte = statusByte.toString(16).split(''); // split the status byte HEX representation, to obtain 4 bits values
           if (!statusByte[1]) {
             statusByte.unshift('0');
@@ -213,10 +212,10 @@ export class MidiParser implements Midi.Parser {
           const channel = parseInt(statusByte[1], 16); // second byte is channel
           switch (eventType) {
             case 0xF: { // System Exclusive Events
-              const event_length = file.readVariableLengthQnt();
+              const eventLength = file.readVariableLengthQnt();
               midiFile.tracks[t - 1][e - 1] = [
                 deltaTime,
-                { data: file.readInt(event_length) },
+                { data: file.readInt(eventLength) },
               ];
               console.info('Unimplemented 0xF exclusive events! data block readed as Integer');
               break;
