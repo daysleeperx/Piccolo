@@ -1,7 +1,7 @@
 import { MusicGenerator } from "../src/generator/Generator";
 import path from 'path';
 import { readFileSync } from 'fs';
-import { MidiParser } from "../src/parser/MidiParser";
+import MidiParser from "../src/parser/MidiParser";
 import { Midi } from "../src/parser/Parser";
 import Utils from "../src/common/Utils";
 

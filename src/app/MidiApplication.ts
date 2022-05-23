@@ -7,7 +7,7 @@ import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 import Utils from '../common/Utils';
 import { CLIApplication } from './CLIApplication';
-import { MidiParser } from '../parser/MidiParser';
+import MidiParser from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
 import UnreachableCode from '../common/UnreachableCode';
 

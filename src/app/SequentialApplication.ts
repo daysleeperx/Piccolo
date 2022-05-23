@@ -6,7 +6,7 @@ import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
 import { MidiApplication, MidiSourceAppOptions } from './MidiApplication';
 import MidiBuilder from '../parser/MidiBuilder';
-import { MidiParser } from '../parser/MidiParser';
+import MidiParser from '../parser/MidiParser';
 import UnreachableCode from '../common/UnreachableCode';
 
 export default class SequentialApplication extends MidiApplication {
