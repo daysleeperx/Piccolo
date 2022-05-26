@@ -73,7 +73,7 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
     options: MarkovChainMusicGeneratorOptions,
   ): Promise<MarkovChainMusicGenerator> {
     const { steps, order } = options;
-    return new MarkovChainMusicGenerator(+steps, +order);
+    return new MarkovChainMusicGenerator(Number(steps), Number(order));
   }
 
   public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {

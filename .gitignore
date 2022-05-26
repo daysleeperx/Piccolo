@@ -361,3 +361,5 @@ MigrationBackup/
 *.ttc
 *.ttm
 interpret
+
+/midi_out/

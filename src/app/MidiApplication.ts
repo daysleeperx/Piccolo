@@ -14,7 +14,7 @@ import UnreachableCode from '../common/UnreachableCode';
 export interface MidiSourceAppOptions {
     source: string;
     out: string;
-    outputs: number;
+    outputs: string;
     name: string;
 }
 
@@ -50,6 +50,13 @@ export class MidiApplication implements CLIApplication {
         { name: 'outputs', message: 'No. of outputs' },
         { name: 'name', message: 'Name of output file' },
       ],
+      validate: (value) => {
+        const { outputs } = (value as unknown) as MidiSourceAppOptions;
+        if (Number.isNaN(Number(outputs)) || !Number.isInteger(Number(outputs))) {
+          return 'No. of ouputs must be a Number!';
+        }
+        return true;
+      },
     });
 
     const { type } = await prompt<{ type: string }>({
@@ -111,7 +118,7 @@ export class MidiApplication implements CLIApplication {
   private async readMidiFile(): Promise<void> {
     const { source } = this.options;
 
-    const buffer: Buffer = readFileSync(path.join(__dirname, source));
+    const buffer: Buffer = readFileSync(path.join(process.cwd(), source));
 
     this.midiFile = this.parser.parse(buffer);
     const { format, tracks, division } : Midi.MidiFile = this.midiFile;
@@ -149,7 +156,7 @@ export class MidiApplication implements CLIApplication {
         tracks: [Utils.sequenceToMidiTrack(seq)],
       };
       const outBuffer: Buffer = this.builder.build(outMidi);
-      writeFileSync(path.join(__dirname, `${out}/${name}_${idx}.midi`), outBuffer);
+      writeFileSync(path.join(process.cwd(), `${out}/${name}_${idx}.midi`), outBuffer);
     });
   }
 
