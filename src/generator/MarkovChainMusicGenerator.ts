@@ -15,7 +15,7 @@ function getWeightedRandomKey(probs: Map<string, number>): string {
   return [...probs.keys()].find((k) => rand <= (sum += probs.get(k)));
 }
 
-function transitionMatrix(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
+function transitionGraph(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
   return notes
     .slice(Math.min(order, notes.length - 1))
     .map((note: MusicGenerator.Note, idx: number) => [note, notes.slice(idx, idx + order)])
@@ -78,7 +78,7 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
 
   public async generate(input: MusicGenerator.Sequence): Promise<MusicGenerator.Sequence> {
     const { notes, quantization, tempo } : MusicGenerator.Sequence = input;
-    const transitions: TransitionMatrix = transitionMatrix(notes, this.order);
+    const transitions: TransitionMatrix = transitionGraph(notes, this.order);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
       ...generateSequence(seed, transitions, this.steps),
