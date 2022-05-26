@@ -141,7 +141,7 @@ export class MidiApplication implements CLIApplication {
     const { out, name, outputs } = this.options;
 
     const generatedSequences: MusicGenerator.Sequence[] = await Promise.all(
-      [...Array(+outputs).keys()].reduce<Promise<MusicGenerator.Sequence>[]>(
+      [...Array(Number(outputs)).keys()].reduce<Promise<MusicGenerator.Sequence>[]>(
         (acc, _) => [...acc, this.generator.generate(this.source)],
         [],
       ),
