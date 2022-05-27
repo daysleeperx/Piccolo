@@ -10,6 +10,7 @@ import { CLIApplication } from './CLIApplication';
 import MidiParser from '../parser/MidiParser';
 import MidiBuilder from '../parser/MidiBuilder';
 import UnreachableCode from '../common/UnreachableCode';
+import TypeGuards from '../common/TypeGuards';
 
 export interface MidiSourceAppOptions {
     source: string;
@@ -105,6 +106,32 @@ export class MidiApplication implements CLIApplication {
       name: 'options',
       message: 'Provide generator options',
       choices: genChoices,
+      validate: (value) => {
+        const opts = (value as unknown) as MusicGenerator.GeneratorOptions;
+        if (TypeGuards.isMarkovChainMusicGeneratorOptions(opts)) {
+          const { order, steps } = opts;
+          if (
+            Number.isNaN(Number(order)) ||
+            !Number.isInteger(Number(order)) ||
+            Number.isNaN(Number(steps)) ||
+            !Number.isInteger(Number(steps))
+          ) {
+            return 'Markov Chain Music Generator options order and steps must be integers!';
+          }
+        }
+        if (TypeGuards.isMagentaMusicGeneratorOptions(opts)) {
+          const { temperature, steps } = opts;
+          if (
+            Number.isNaN(Number(temperature)) ||
+            Number.isNaN(Number.parseFloat(temperature.toString())) ||
+            Number.isNaN(Number(steps)) ||
+            !Number.isInteger(Number(steps))
+          ) {
+            return 'Magenta MusicRNN Music Generator options temperature and steps must be numbers!';
+          }
+        }
+        return true;
+      },
     });
 
     const parser: Midi.Parser = new MidiParser();
@@ -125,12 +152,14 @@ export class MidiApplication implements CLIApplication {
 
     let track = 0;
     if (format !== Midi.FileFormat.SINGLE_TRACK) {
-      const { response } = await prompt<{ response: string }>({
-        type: 'input',
+      ({ response: track } = await prompt<{ response: number }>({
+        type: 'numeral',
         name: 'response',
+        min: 0,
+        max: tracks.length - 1,
         message: 'The provided MIDI track includes multiple tracks. Enter source track number:',
-      });
-      track = Math.min(Number(response), tracks.length - 1);
+      }));
+      track = Math.max(0, Math.min(track, tracks.length - 1)); /* due to https://github.com/enquirer/enquirer/issues/104 */
     }
 
     this.source = Utils.extractSequenceFromTrack(tracks[track], { value: 120 }, division);
@@ -162,14 +191,11 @@ export class MidiApplication implements CLIApplication {
 
   protected async sendOSCMessage(): Promise<void> {
     const { notes, quantization: { stepsPerQuarter } } = this.currentSequence;
-    const [pitches, durations] : [number[], number[]] = [[], []];
-    notes.forEach(([pitch, duration]) => {
-      pitches.push(pitch);
-      durations.push(duration / stepsPerQuarter);
-    });
+    const pitches: number[] = notes.reduce((acc, [pitch, _]) => [...acc, pitch], []);
+    const steps: number[] = notes.reduce((acc, [_, qs]) => [...acc, qs / stepsPerQuarter], []);
 
     this.oscClient.send(['/gen/sequence', ...pitches]);
-    this.oscClient.send(['/gen/steps', ...durations]);
+    this.oscClient.send(['/gen/steps', ...steps]);
   }
 
   public async run(): Promise<void> {
