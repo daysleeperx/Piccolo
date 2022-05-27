@@ -1,13 +1,13 @@
 import { MusicGenerator } from './Generator';
 import Utils from '../common/Utils';
 
-type TransitionMatrix = Map<string, Map<string, number>>;
+export type TransitionMatrix = Map<string, Map<string, number>>;
 
-function getRandomSeqKey(matrix: TransitionMatrix): string {
+export function getRandomSeqKey(matrix: TransitionMatrix): string {
   return [...matrix.keys()][Math.floor(Math.random() * matrix.size)];
 }
 
-function getWeightedRandomKey(probs: Map<string, number>): string {
+export function getWeightedRandomKey(probs: Map<string, number>): string {
   const probsSum: number = [...probs.values()].reduce((a, b) => a + b, 0);
   const rand: number = Math.floor(Math.random() * probsSum);
   let sum = 0;
@@ -15,7 +15,7 @@ function getWeightedRandomKey(probs: Map<string, number>): string {
   return [...probs.keys()].find((k) => rand <= (sum += probs.get(k)));
 }
 
-function transitionGraph(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
+export function transitionGraph(notes: MusicGenerator.Note[], order: number): TransitionMatrix {
   return notes
     .slice(Math.min(order, notes.length - 1))
     .map((note: MusicGenerator.Note, idx: number) => [note, notes.slice(idx, idx + order)])
@@ -36,7 +36,7 @@ function transitionGraph(notes: MusicGenerator.Note[], order: number): Transitio
     );
 }
 
-function* generateSequence(
+export function* generateSequence(
   current: MusicGenerator.Note[],
   transtions: TransitionMatrix,
   step: number,
