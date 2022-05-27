@@ -63,6 +63,7 @@ export interface MarkovChainMusicGeneratorOptions {
   steps: number;
   order: number;
 }
+
 export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
   private constructor(
         private readonly steps: number,
@@ -81,7 +82,7 @@ export class MarkovChainMusicGenerator implements MusicGenerator.Generator {
     const transitions: TransitionMatrix = transitionGraph(notes, this.order);
     const seed: MusicGenerator.Note[] = getRandomSeqKey(transitions).split('->').map(Utils.keyToNote);
     const generatedNotes: MusicGenerator.Note[] = [
-      ...generateSequence(seed, transitions, this.steps),
+      ...seed, ...generateSequence(seed, transitions, this.steps - this.order),
     ];
     return { quantization, tempo, notes: generatedNotes };
   }
