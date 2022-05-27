@@ -1,5 +1,6 @@
 import { MusicGenerator } from '../generator/Generator';
 import { Midi } from '../parser/Parser';
+import TypeGuards from './TypeGuards';
 
 export default class Utils {
   public static async sleep(ms: number): Promise<void> {
@@ -14,11 +15,6 @@ export default class Utils {
     [ticks, _msg] : Midi.Event,
   ) : MusicGenerator.Note => [(msg as Midi.NoteOn).note, ticks];
 
-  public static isNoteMessage(msg: Midi.Message): msg is Midi.NoteOn | Midi.NoteOff {
-    return (msg as Midi.NoteOn | Midi.NoteOff).note !== undefined &&
-              (msg as Midi.NoteOn | Midi.NoteOff).velocity !== undefined;
-  }
-
   public static extractSequenceFromTrack(
     track: Midi.Track,
     tempo: Midi.Tempo,
@@ -26,7 +22,7 @@ export default class Utils {
   ): MusicGenerator.Sequence {
     return {
       notes: track
-        .filter(([_, msg]: Midi.Event) => Utils.isNoteMessage(msg))
+        .filter(([_, msg]: Midi.Event) => TypeGuards.isNoteMessage(msg))
         .map((
           e: Midi.Event,
           idx: number,

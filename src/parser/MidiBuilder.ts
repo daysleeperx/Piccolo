@@ -1,5 +1,5 @@
 import midiConverter from 'midi-converter';
-import Utils from '../common/Utils';
+import TypeGuards from '../common/TypeGuards';
 import { Midi } from './Parser';
 
 export default class MidiBuilder implements Midi.Builder {
@@ -15,7 +15,7 @@ export default class MidiBuilder implements Midi.Builder {
         ticksPerBeat: (division as Midi.TicksPerBeat).ticksPerBeat,
       },
       tracks: tracks.map((trk: Midi.Track) => trk
-        .filter(([_, msg]: Midi.Event) => Utils.isNoteMessage(msg))
+        .filter(([_, msg]: Midi.Event) => TypeGuards.isNoteMessage(msg))
         .map(([ticks, msg]: Midi.Event, idx: number) => ({
           deltaTime: (idx % 2 === 0) ? 0 : ticks,
           channel: 0,
