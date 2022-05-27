@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { prompt } from 'enquirer';
 import * as OSC from 'node-osc';
+import TypeGuards from '../common/TypeGuards';
 import UnreachableCode from '../common/UnreachableCode';
 import { MusicGenerator } from '../generator/Generator';
 import { CLIApplication } from './CLIApplication';
@@ -59,6 +60,32 @@ export default class DialogueApplication implements CLIApplication {
       name: 'options',
       message: 'Provide generator options',
       choices: genChoices,
+      validate: (value) => {
+        const opts = (value as unknown) as MusicGenerator.GeneratorOptions;
+        if (TypeGuards.isMarkovChainMusicGeneratorOptions(opts)) {
+          const { order, steps } = opts;
+          if (
+            Number.isNaN(Number(order)) ||
+            !Number.isInteger(Number(order)) ||
+            Number.isNaN(Number(steps)) ||
+            !Number.isInteger(Number(steps))
+          ) {
+            return 'Markov Chain Music Generator options order and steps must be integers!';
+          }
+        }
+        if (TypeGuards.isMagentaMusicGeneratorOptions(opts)) {
+          const { temperature, steps } = opts;
+          if (
+            Number.isNaN(Number(temperature)) ||
+            Number.isNaN(Number.parseFloat(temperature.toString())) ||
+            Number.isNaN(Number(steps)) ||
+            !Number.isInteger(Number(steps))
+          ) {
+            return 'Magenta MusicRNN Music Generator options temperature and steps must be numbers!';
+          }
+        }
+        return true;
+      },
     });
 
     const generator: MusicGenerator.Generator =
@@ -75,7 +102,7 @@ export default class DialogueApplication implements CLIApplication {
   private setupOsc(): void {
     this.oscServer.on('/gen/sequence', async (message: [string, ...OSC.ArgumentType[]]) => {
       console.log(chalk.white(`OSC message received: ${message}`));
-      const [_, msg] = message;
+      const [_addr, msg] = message;
 
       const sequence : MusicGenerator.Sequence = {
         notes: JSON.parse(msg as string),
@@ -83,15 +110,15 @@ export default class DialogueApplication implements CLIApplication {
         quantization: { stepsPerQuarter: 1 },
       };
 
-      const genSequence : MusicGenerator.Sequence = await this.generator.generate(sequence);
+      const {
+        notes,
+        quantization: { stepsPerQuarter },
+      } : MusicGenerator.Sequence = await this.generator.generate(sequence);
 
-      const [notes, steps] : [number[], number[]] = [[], []];
-      genSequence.notes.forEach(([note, step]) => {
-        notes.push(note);
-        steps.push(step);
-      });
+      const pitches: number[] = notes.reduce((acc, [pitch, _]) => [...acc, pitch], []);
+      const steps: number[] = notes.reduce((acc, [_, qs]) => [...acc, qs / stepsPerQuarter], []);
 
-      this.oscClient.send(new OSC.Message('/gen/sequence', ...notes));
+      this.oscClient.send(new OSC.Message('/gen/sequence', ...pitches));
       this.oscClient.send(new OSC.Message('/gen/steps', ...steps));
     });
   }
