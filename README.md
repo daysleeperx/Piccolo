@@ -35,7 +35,7 @@ At the start of the application, the user is presented with multiple modes to ch
   SEQUENTIAL
 ```
 
-Next, some options need to be provided including the relative path of MIDI input, the location of the output files, the number of outputs and name of output file. In this example the file spiegel.midi is chosen (this file can be found in the `midi/` folder in the root directory of the project repository). Additionally, an output folder needs to be created (`midi_out/` is created in this example in the root directory).
+Next, some options need to be provided including the relative path of MIDI input, the location of the output files, the number of outputs and name of output file. In this example the file `spiegel.midi` is chosen (this file can be found in the `midi/` folder in the root directory of the project repository). Additionally, an output folder needs to be created (`midi_out/` is created in this example in the root directory).
 ```
 ? Please provide the following information
                 Source : midi/spiegel.midi
