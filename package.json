@@ -34,7 +34,6 @@
   "dependencies": {
     "@magenta/music": "^1.23.1",
     "@types/cli-progress": "^3.9.2",
-    "@types/cli-table": "^0.3.0",
     "@types/figlet": "^1.5.4",
     "@types/node-osc": "^6.0.0",
     "chalk": "4.1.2",
