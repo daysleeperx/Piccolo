@@ -20,7 +20,7 @@ yarn compile
 ```
 # Usage
 The first step would be to copy the code from [Sonic Pi Demo Endpoint](./sonic_pi/spiegel.rb) to an empty buffer in Sonic Pi.
-After pressing Run in Sonic Pi, the piano part should start playing. The next step is to start the application.
+After pressing `Run` in Sonic Pi, the piano part should start playing. The next step is to start the application.
 
 In order to run the application run the following command:
 ```
