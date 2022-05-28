@@ -9,9 +9,9 @@ import SequentialApplication from './SequentialApplication';
 export type CLIOptions = MidiSourceAppOptions;
 
 export enum ApplicationMode {
-  MIDI,
-  DIALOGUE,
-  SEQUENTIAL
+  MIDI = 'MIDI',
+  DIALOGUE = 'DIALOGUE',
+  SEQUENTIAL = 'SEQUENTIAL'
 }
 
 export interface CLIApplication {

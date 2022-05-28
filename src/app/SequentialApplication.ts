@@ -38,19 +38,16 @@ export default class SequentialApplication extends MidiApplication {
       name: 'type',
       message: 'Choose generator type',
       choices: [
-        { name: 'Markov Chain', value: '0' },
-        { name: 'Magenta MusicRNN', value: '1' },
+        { name: 'Markov Chain' },
+        { name: 'Magenta MusicRNN' },
       ],
-      result() {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        return (this as any).focused.value;
-      },
     });
 
-    const generatorType: MusicGenerator.GeneratorType = [
-      MusicGenerator.GeneratorType.MARKOV_CHAIN,
-      MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN,
-    ][Number(type)];
+    const generatorType: MusicGenerator.GeneratorType = MusicGenerator.GeneratorType[
+      Object.keys(MusicGenerator.GeneratorType).find(
+        (k) => MusicGenerator.GeneratorType[k as MusicGenerator.GeneratorTypeKey] === type,
+      ) as MusicGenerator.GeneratorTypeKey
+    ];
 
     let genChoices;
 

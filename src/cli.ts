@@ -1,28 +1,6 @@
 import { prompt } from 'enquirer';
 import figlet from 'figlet';
-import { Command } from 'commander';
-import { MidiSourceAppOptions } from './app/MidiApplication';
 import { ApplicationMode, CLIApplication, CLIApplicationFactory } from './app/CLIApplication';
-
-const modes = [
-  ApplicationMode.MIDI,
-  ApplicationMode.DIALOGUE,
-  ApplicationMode.SEQUENTIAL,
-];
-
-function initCommander(): Command {
-  const program: Command = new Command();
-
-  program
-    .name('music-generator')
-    .option('-i, --source <value>')
-    .option('-o, --out <value>')
-    .option('-n, --name <value>')
-    .option('-nn, --outputs <value>')
-    .parse(process.argv);
-
-  return program;
-}
 
 async function generateAsciiArt() {
   return new Promise((resolve, reject) => {
@@ -46,31 +24,25 @@ async function generateAsciiArt() {
 
 async function main() {
   console.log(await generateAsciiArt());
-  const program: Command = initCommander();
-  let options: MidiSourceAppOptions;
-  let mode = 0;
 
-  if (Object.keys(program.opts()).length === 0) {
-    ({ mode } = await prompt<{ mode: number }>({
-      type: 'select',
-      name: 'mode',
-      message: 'Choose application mode',
-      choices: [
-        { name: 'MIDI', value: '0' },
-        { name: 'DIALOGUE', value: '1' },
-        { name: 'SEQUENTIAL', value: '2' },
-      ],
-      result() {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        return (this as any).focused.value;
-      },
-    }));
-  } else {
-    options = program.opts() as MidiSourceAppOptions;
-    console.log(options);
-  }
+  const { mode } = await prompt<{ mode: string }>({
+    type: 'select',
+    name: 'mode',
+    message: 'Choose application mode',
+    choices: [
+      { name: 'MIDI' },
+      { name: 'DIALOGUE' },
+      { name: 'SEQUENTIAL' },
+    ],
+  });
 
-  const cliApp: CLIApplication = await CLIApplicationFactory.createApplication(modes[Number(mode)]);
+  const applicationMode: ApplicationMode = ApplicationMode[
+    Object.keys(ApplicationMode).find(
+      (k) => ApplicationMode[k as keyof typeof ApplicationMode] === mode,
+    ) as keyof typeof ApplicationMode
+  ];
+
+  const cliApp: CLIApplication = await CLIApplicationFactory.createApplication(applicationMode);
   await cliApp.run();
 }
 

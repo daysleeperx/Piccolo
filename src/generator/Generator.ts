@@ -28,9 +28,11 @@ export namespace MusicGenerator {
       MarkovChainMusicGeneratorOptions | MagentaMusicRNNGeneratorOptions;
 
     export enum GeneratorType {
-        MARKOV_CHAIN,
-        MAGNETA_MUSIC_RNN
+        MARKOV_CHAIN = 'Markov Chain',
+        MAGNETA_MUSIC_RNN = 'Magenta MusicRNN'
     }
+
+    export type GeneratorTypeKey = keyof typeof GeneratorType;
 
     export interface Generator {
         /**
