@@ -13,8 +13,8 @@ Piccolo is an algorithmic music generator that supports integration with [Sonic 
 - [NodeJS](https://nodejs.org/en/) v16.13.2
 - [Typescript](https://www.typescriptlang.org/) v4.5.5+
 # Installation
-In order to install the application run the following commands
-```bash
+In order to install the application run the following commands:
+```
 yarn install
 yarn compile
 ```
@@ -22,12 +22,12 @@ yarn compile
 The first step would be to copy the code from [Sonic Pi Demo Endpoint](./sonic_pi/spiegel.rb) to an empty buffer in Sonic Pi.
 After pressing Run in Sonic Pi, the piano part should start playing. The next step is to start the application.
 
-In order to run the application run the following command
-```bash
+In order to run the application run the following command:
+```
 node lib/src/cli.js
 ```
 
-At the start of the application, the user is presented with multiple modes to choose from. The mode `MIDI` will be chosen in this example
+At the start of the application, the user is presented with multiple modes to choose from. The mode `MIDI` will be chosen in this example.
 ```
 ? Choose application mode ...
 > MIDI
@@ -44,7 +44,7 @@ Next, some options need to be provided including the relative path of MIDI input
    Name of output file : test_melody
 ```
 
-Afterwards the user will be presented with the music generator choice and corresponding options
+Afterwards the user will be presented with the music generator choice and corresponding options.
 ```
 ? Choose generator type ...
 > Markov Chain
@@ -75,6 +75,6 @@ Send sequence via OSC? (y/N) * true
 The selected sequences will then be sent to Sonic Pi and the incoming OSC messages will be seen in Sonic Pi’s Cue Viewer.
 
 The process of choosing and sending the generated sequence to Sonic Pi can be repeated
-until the usertypes `N` in the `Send another sequence via OSC?` prompt.
+until the user types `N` in the `Send another sequence via OSC?` prompt.
 # License
 [MIT License](./LICENSE)
