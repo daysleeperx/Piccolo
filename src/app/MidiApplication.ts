@@ -65,19 +65,16 @@ export class MidiApplication implements CLIApplication {
       name: 'type',
       message: 'Choose generator type',
       choices: [
-        { name: 'Markov Chain', value: '0' },
-        { name: 'Magenta MusicRNN', value: '1' },
+        { name: 'Markov Chain' },
+        { name: 'Magenta MusicRNN' },
       ],
-      result() {
-        /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        return (this as any).focused.value;
-      },
     });
 
-    const generatorType: MusicGenerator.GeneratorType = [
-      MusicGenerator.GeneratorType.MARKOV_CHAIN,
-      MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN,
-    ][Number(type)];
+    const generatorType: MusicGenerator.GeneratorType = MusicGenerator.GeneratorType[
+      Object.keys(MusicGenerator.GeneratorType).find(
+        (k) => MusicGenerator.GeneratorType[k as MusicGenerator.GeneratorTypeKey] === type,
+      ) as MusicGenerator.GeneratorTypeKey
+    ];
 
     let genChoices;
 
@@ -210,25 +207,32 @@ export class MidiApplication implements CLIApplication {
       message: 'Send sequence via OSC?',
     }));
 
-    /* eslint-disable no-await-in-loop */
-    while (this.running) {
-      const { seq } = await prompt<{ seq: string }>({
-        type: 'select',
-        name: 'seq',
-        message: 'Choose sequence',
-        choices: [...this.sequences.keys()],
-      });
-
-      this.currentSequence = this.sequences.get(seq);
-      await this.sendOSCMessage();
-
-      ({ sendAnother: this.running } = await prompt<{ sendAnother: boolean }>({
-        type: 'confirm',
-        name: 'sendAnother',
-        message: 'Send another sequence via OSC?',
-      }));
-    }
+    await this.processLoop();
 
     this.oscClient.close();
+  }
+
+  private async processLoop(): Promise<void> {
+    if (!this.running) {
+      return;
+    }
+
+    const { seq } = await prompt<{ seq: string }>({
+      type: 'select',
+      name: 'seq',
+      message: 'Choose sequence',
+      choices: [...this.sequences.keys()],
+    });
+
+    this.currentSequence = this.sequences.get(seq);
+    await this.sendOSCMessage();
+
+    ({ sendAnother: this.running } = await prompt<{ sendAnother: boolean }>({
+      type: 'confirm',
+      name: 'sendAnother',
+      message: 'Send another sequence via OSC?',
+    }));
+
+    await this.processLoop();
   }
 }
