@@ -1,22 +1,22 @@
 {
-  "name": "markov-chain-music-demo",
+  "name": "piccolo",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/src/cli.js",
   "scripts": {
     "compile": "tsc --build",
     "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/daysleeperx/Markov-Chain-Music-Demo.git"
+    "url": "git+https://github.com/daysleeperx/Piccolo.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Viktor Pavlov",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/daysleeperx/Markov-Chain-Music-Demo/issues"
+    "url": "https://github.com/daysleeperx/Piccolo/issues"
   },
-  "homepage": "https://github.com/daysleeperx/Markov-Chain-Music-Demo#readme",
+  "homepage": "https://github.com/daysleeperx/Piccolo#readme",
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.8",
