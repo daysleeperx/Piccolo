@@ -7,6 +7,8 @@
    \ \_\   \ \_\ \____\ \____\ \____//\____\ \____/
     \/_/    \/_/\/____/\/____/\/___/ \/____/\/___/
 ```
+![build](https://github.com/daysleeperx/Piccolo/actions/workflows/node.js.yml/badge.svg)
+
 Piccolo is an algorithmic music generator that supports integration with [Sonic Pi](https://sonic-pi.net/), utilizing the Open Sound Control protocol. Melody variations can be generated from MIDI sources and from messages sent by Sonic Pi directly in real-time. Algorithmic music composition implementations are based on Markov chains and [Google AI’s Magenta](https://magenta.tensorflow.org/) neural network.
 # Prerequisites
 - [Yarn](https://yarnpkg.com/)
