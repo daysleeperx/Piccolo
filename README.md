@@ -15,7 +15,7 @@ Piccolo is an algorithmic music generator that supports integration with [Sonic 
 - [NodeJS](https://nodejs.org/en/) v16.13.2
 - [Typescript](https://www.typescriptlang.org/) v4.5.5+
 # Installation
-In order to install the application run the following commands:
+In order to install the application clone the repo and run the following commands:
 ```
 yarn install
 yarn compile
