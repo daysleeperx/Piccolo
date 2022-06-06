@@ -200,17 +200,8 @@ export class MidiApplication implements CLIApplication {
     const spinner = ora('Generating sequences...').start();
     await this.generateSequences();
     spinner.succeed(`Generated ${this.sequences.size} sequences.`);
-    console.log(JSON.stringify(Object.fromEntries(this.sequences)));
-    const obj = Object.fromEntries(this.sequences);
-    Object.keys(obj).forEach((k) => {
-      const { notes, quantization: { stepsPerQuarter }, tempo } = obj[k];
-      obj[k] = {
-        notes: notes.map(([pitch, qs]) => [pitch, qs / stepsPerQuarter]),
-        quantization: { stepsPerQuarter},
-        tempo
-      };
-    });
-    new OSC.Client('127.0.0.1', 12000).send(['test', JSON.stringify(obj)]);
+
+    this.sendSequencesToVisualizer();
 
     ({ sendOsc: this.running } = await prompt<{ sendOsc: boolean }>({
       type: 'confirm',
@@ -245,5 +236,21 @@ export class MidiApplication implements CLIApplication {
     }));
 
     await this.processLoop();
+  }
+
+  protected sendSequencesToVisualizer() {
+    const oscClient = new OSC.Client('127.0.0.1', 12000);
+    const sequencesObj = Object.fromEntries(this.sequences);
+
+    Object.keys(sequencesObj).forEach((key) => {
+      const { notes, quantization: { stepsPerQuarter }, tempo } = sequencesObj[key];
+      sequencesObj[key] = {
+        notes: notes.map(([pitch, qs]) => [pitch, qs / stepsPerQuarter]),
+        quantization: { stepsPerQuarter },
+        tempo,
+      };
+    });
+
+    oscClient.send(...[['/visualize', JSON.stringify(sequencesObj)], () => oscClient.close()]);
   }
 }
