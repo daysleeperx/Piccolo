@@ -88,7 +88,7 @@ export class MidiApplication implements CLIApplication {
       case MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN:
         genChoices = [
           { name: 'steps', message: 'Number of steps to be generated' },
-          { name: 'temperature', message: 'The temparature of the MusicRNN' },
+          { name: 'temperature', message: 'The temperature of the MusicRNN' },
           { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
         ];
         break;

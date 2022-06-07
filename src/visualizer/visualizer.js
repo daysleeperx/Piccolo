@@ -23,6 +23,8 @@ function receiveOsc(address, value) {
         rows: max - min + 1,
         columns: Math.ceil(sequence.notes.reduce((acc, [_, qs]) => acc + qs, 0) / MIN_STEP),
       });
+      sequencer.colorize('fill', 'black');
+      sequencer.colorize('accent', '#FE00FE');
 
       sequence.notes.reduce((step, [pitch, qs]) => {
         [...Array(Math.max(1, qs / MIN_STEP)).keys()].forEach(() => {
