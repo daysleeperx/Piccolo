@@ -88,7 +88,7 @@ export class MidiApplication implements CLIApplication {
       case MusicGenerator.GeneratorType.MAGNETA_MUSIC_RNN:
         genChoices = [
           { name: 'steps', message: 'Number of steps to be generated' },
-          { name: 'temperature', message: 'The temparature of the MusicRNN' },
+          { name: 'temperature', message: 'The temperature of the MusicRNN' },
           { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
         ];
         break;
@@ -201,6 +201,8 @@ export class MidiApplication implements CLIApplication {
     await this.generateSequences();
     spinner.succeed(`Generated ${this.sequences.size} sequences.`);
 
+    this.sendSequencesToVisualizer();
+
     ({ sendOsc: this.running } = await prompt<{ sendOsc: boolean }>({
       type: 'confirm',
       name: 'sendOsc',
@@ -234,5 +236,21 @@ export class MidiApplication implements CLIApplication {
     }));
 
     await this.processLoop();
+  }
+
+  protected sendSequencesToVisualizer() {
+    const oscClient = new OSC.Client('127.0.0.1', 12000);
+    const sequencesObj = Object.fromEntries(this.sequences);
+
+    Object.keys(sequencesObj).forEach((key) => {
+      const { notes, quantization: { stepsPerQuarter }, tempo } = sequencesObj[key];
+      sequencesObj[key] = {
+        notes: notes.map(([pitch, qs]) => [pitch, qs / stepsPerQuarter]),
+        quantization: { stepsPerQuarter },
+        tempo,
+      };
+    });
+
+    oscClient.send(...[['/visualize', JSON.stringify(sequencesObj)], () => oscClient.close()]);
   }
 }
