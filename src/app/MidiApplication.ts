@@ -199,6 +199,7 @@ export class MidiApplication implements CLIApplication {
     await this.readMidiFile();
     const spinner = ora('Generating sequences...').start();
     await this.generateSequences();
+    await Utils.sleep(2000); /* Cosmetic stuff */
     spinner.succeed(`Generated ${this.sequences.size} sequences.`);
 
     this.sendSequencesToVisualizer();
