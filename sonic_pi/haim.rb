@@ -40,7 +40,7 @@ bass_line = [
 live_loop :bass, sync: :metronome do
   use_synth :saw
   note, step = bass_line.tick
-  play note, cutoff: 50, attack: 0, decay: step * 0.5, sustain: 0, release: step * 0.7
+  play note, amp: 2, cutoff: 50, attack: 0, decay: step * 0.5, sustain: 0, release: step * 0.7
   sleep step
 end
 
@@ -50,6 +50,68 @@ end
 #   sleep step
 #   midi_note_off note, channel: 0
 # end
-# 
+#
 # midi_all_notes_off
+
+# use_bpm 100
+
+sax_part = [
+  [:B3, 0.25],
+  [:Ds4, 0.5],
+  [:A3, 0.25],
+  [:Cs4, 0.5],
+  [:Gs3, 0.25],
+  [:B3, 0.5],
+  [:Fs3, 0.25],
+  [:A3, 0.5],
+  [:E3, 0.5],
+  [:Gs3, 0.5],
+  [:Fs3, 4],
+  [:B3, 0.25],
+  [:Ds4, 0.5],
+  [:A3, 0.25],
+  [:Cs4, 0.5],
+  [:Gs3, 0.25],
+  [:B3, 0.5],
+  [:Fs3, 0.25],
+  [:A3, 0.5],
+  [:E3, 0.5],
+  [:Gs3, 0.5],
+  [:B3, 4],
+  [:B3, 0.25],
+  [:Ds4, 0.5],
+  [:A3, 0.25],
+  [:Cs4, 0.5],
+  [:Gs3, 0.25],
+  [:B3, 0.5],
+  [:Fs3, 0.25],
+  [:A3, 0.5],
+  [:E3, 0.5],
+  [:Gs3, 0.5],
+  [:Fs3, 4],
+  [:B3, 0.25],
+  [:Ds4, 0.5],
+  [:A3, 0.25],
+  [:Cs4, 0.5],
+  [:Gs3, 0.25],
+  [:B3, 0.5],
+  [:Fs3, 0.25],
+  [:A3, 0.5],
+  [:E3, 0.5],
+  [:Gs3, 0.5],
+  [:Ds3, 4],
+].ring
+
+live_loop :sax_start, sync: :metronome do
+  sleep 8
+end
+
+with_fx :reverb, room: 0.9 do
+  live_loop :sax, sync: :sax_start do
+    use_synth :saw
+    note, step = sax_part.tick
+    play note, cutoff: 96, amp: 0.9, attack: step > 2 ? step * 0.1 : 0.2, attack_level: 1, decay: step * 0.1, sustain: step * 0.3, sustain_level: 0.7, release: step > 1 ? step * 0.4 : step * 0.2
+    sleep step
+  end
+end
 
