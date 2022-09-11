@@ -80,6 +80,11 @@ define :pattern do |pattern|
   return pattern.ring.tick == "x"
 end
 
+live_loop :percussion, sync: :sax_start do
+  sample :tabla_ghe1, amp: 1 if pattern "x-x----x-x--x---"
+  sleep 0.25
+end
+
 live_loop :kick, sync: :metronome do
   sample :drum_heavy_kick if pattern "x-x----x---x-x--"
   sleep 0.25
@@ -133,3 +138,5 @@ end
 
 use_osc "localhost", 9912
 osc "/gen/sequence", *get[:sax_part].to_json
+
+
