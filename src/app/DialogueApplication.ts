@@ -43,7 +43,7 @@ export default class DialogueApplication implements CLIApplication {
         genChoices = [
           { name: 'steps', message: 'Number of steps to be generated' },
           { name: 'temperature', message: 'The temparature of the MusicRNN' },
-          { name: 'chordProgression', message: 'Chord progression the sequence should be based on' },
+          { name: 'chordProgression', message: 'Chord progression the sequence should be based on (comma-separated)' },
         ];
         break;
       default:
